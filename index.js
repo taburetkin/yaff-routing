@@ -11,34 +11,40 @@ config.ResponseContext = ResponseContext;
 
 export default {
   _ensureRouting() {
-    if (!this.routing) {
-      this.routing = this.createRouting();
+    if (!this.instance) {
+      this.instance = this.createRouting();
     }
-    return this.routing;
+    return this.instance;
   },
   createRouting() {
     return new config.Routing(config.routingOptions);
   },
-  get() {
-    return this._ensureRouting().get(...arguments);
+  get(...args) {
+    return this._ensureRouting().get(...args);
   },
-  use() {
-    return this._ensureRouting().use(...arguments);
+  use(...args) {
+    return this._ensureRouting().use(...args);
   },
   isStarted() {
-    return this.routing && this.routing.isStarted();
+    if (this.instance) {
+      return this.instance.isStarted();
+    }
+    return false;
   },
-  start(options) {
-    return this._ensureRouting().start(options);
+  start(...args) {
+    return this._ensureRouting().start(...args);
   },
-  stop() {
-    return this.isStarted() && this.routing.stop();
+  stop(...args) {
+    return this.isStarted() && this.instance.stop(...args);
   },
-  remove() {
-    return this._ensureRouting().remove(...arguments);
+  remove(...args) {
+    if (!this.instance) {
+      return;
+    }
+    return this.instance.remove(...args);
   },
-  navigate() {
-    return this._ensureRouting().navigate(...arguments);
+  navigate(...args) {
+    return this._ensureRouting().navigate(...args);
   },
   config
 };

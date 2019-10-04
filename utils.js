@@ -7,7 +7,7 @@ export function getUrl(url) {
     return new URL(url);
   }
 
-  if (!url.startsWith("/")) {
+  if (!url.toString().startsWith("/")) {
     url = "/" + url;
   }
 

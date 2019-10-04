@@ -21,7 +21,10 @@ class Routing {
       ...handlers
     );
   }
-  start(options = {}) {
+  start(options) {
+    if (typeof options != "object") {
+      options = {};
+    }
     this._ensureStarted(true);
     config.isStarted = true;
     if (options.errorHandlers) {
@@ -35,12 +38,14 @@ class Routing {
   stop() {
     config.isStarted = false;
   }
+
   isStarted() {
     return config.isStarted === true;
   }
 
   _ensureStarted(value = false) {
-    let message = value ? "not yet" : "already";
+    //console.log(message, value, this.isStarted());
+    let message = value ? "already" : "not yet";
     if (this.isStarted() === value) {
       throw new Error(`Routing ${message} started`);
     }
@@ -173,7 +178,7 @@ class Routing {
   //#region navigate section
   navigate(url, options = {}) {
     this._ensureStarted();
-    if (typeof url == "object") {
+    if (typeof url === "object") {
       options = url;
       url = null;
     }
