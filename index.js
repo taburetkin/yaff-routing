@@ -38,5 +38,10 @@ export default {
 			._ensureRouting()
 			.remove(...arguments);
 	},
+	navigate() {
+		return this
+			._ensureRouting()
+			.navigate(...arguments);
+	},
 	config
 };

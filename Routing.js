@@ -9,19 +9,26 @@ class Routing {
 		this._routesByPath = {};
 		this._routes = [];
 		this._globalHandlers = [];
+		this._setErrorHandlers(this.errorHandlers, options.errorHandlers);
+	}
+	_setErrorHandlers(...handlers) {
 		this._errorHandlers = Object.assign({
 			'notfound': () => console.warn('not found'),
 			'notallowed': () => console.warn('not found'),
 			'exception': err => {
 				throw err;
 			},
-		}, this.errorHandlers, options.errorHandlers);
+		}, ...handlers);
 	}
-
-	start() {
-		console.log('started', this._getUrl());
+	start(options = {}) {
 		config.isStarted = true;
-		this.navigate();
+		if (options.errorHandlers) {
+			this._setErrorHandlers(options.errorHandlers);
+		}
+		config.pushState = options.pushState !== false;
+		if (options.trigger !== false) {
+			this.navigate(options);
+		}
 	}
 
 	isStarted() {
@@ -117,10 +124,9 @@ class Routing {
 	async _processRequest(req, res) {
 		let routeHandler = this.findRouteHandler(req);
 		if (routeHandler) {
-			let routeResult = await routeHandler.processRequest(req, res, { globalHandlers: [...this._globalHandlers] });
-			let error = routeResult || res.error;
-			if (error) {
-				this.handleError(error, req, res);
+			await routeHandler.processRequest(req, res, { globalHandlers: [...this._globalHandlers] });
+			if (res.error) {
+				this.handleError(res.error, req, res);
 			}
 		} else {
 			this.handleError('not:found', req, res);
@@ -153,13 +159,15 @@ class Routing {
 
 	//#region navigate section
 	navigate(url, options = {}) {
+		if (typeof url == 'object') {
+			options = url;
+			url = null;
+		}
 		this.setCurrentUrl(url);
 		if (options.trigger !== false) {
-			console.log('..requesting');
 			this.request(url, options);
 		}
 		if (!this.isCurrentUrl(url)) {
-			console.log('..pushing');
 			this.browserPushState(url, options);
 		}
 	}

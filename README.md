@@ -26,6 +26,9 @@ routing.get('articles/:id', (req) => {
 // launch routing
 routing.start();
 
+// changes browser location and invokes all registered handlers
+routing.navigate('articles/123');
+
 ```
 ### Starting routing
 By default routing does not do anything until you start it.  
@@ -278,3 +281,6 @@ Registers the route if it's not and unshift handler to the route's handler chain
 Removes global handler.
 #### remove(routeString, handler)
 Removes route's handler.
+
+#### navigate(url, options)
+Invokes the "request" on given url. Changes browser location and invokes registered callbacks for the route.
