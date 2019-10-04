@@ -7,11 +7,11 @@
 	"author": "dimtabu <dima.taburetkin@gmail.com>",
 	"license": "MIT",
 	"scripts": {
-    "build": "rollup --config",
+		"build": "rollup --config",
 		"test": "mocha --require esm --config ./test/.mocharc.raw.json",
 		"test-w": "mocha -w --require esm --config ./test/.mocharc.raw.json",
-    "test-es5": "mocha --require esm --config ./test/.mocharc.es5.json",
-    "test-esm": "mocha --require esm --config ./test/.mocharc.esm.json",
+		"test-es5": "mocha --require esm --config ./test/.mocharc.es5.json",
+		"test-esm": "mocha --require esm --config ./test/.mocharc.esm.json",
 		"coverage": "nyc npm run test",
 		"coveralls": "yarn coverage && nyc --reporter=text-lcov npm run test | coveralls"
 	},
@@ -26,6 +26,8 @@
 		"coveralls": "^3.0.6",
 		"cross-env": "^5.2.1",
 		"eslint": "^6.3.0",
+		"eslint-config-prettier": "^6.3.0",
+		"eslint-plugin-prettier": "^3.1.1",
 		"esm": "^3.2.25",
 		"mocha": "^6.2.0",
 		"module-alias": "^2.2.1",

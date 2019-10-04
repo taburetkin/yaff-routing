@@ -110,10 +110,10 @@ routing.get('articles/:id', validate, fetchArticle, showArticle);
 routing.start({
 	errorHandlers: {
 		notfound() {
-			console.log('the article you are looking for is not found');
+		  console.log('the article you are looking for is not found');
 		}
 		default(err) {
-			console.log('there was an error', err);
+		  console.log('there was an error', err);
 		}
 	}
 });
