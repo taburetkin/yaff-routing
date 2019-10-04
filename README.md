@@ -61,7 +61,7 @@ routing.get('some/deep/route', (req, res, next) => {
 
 ```
 
-#### Usecase
+#### Usecase 
 Next snipet illustrates one of possible ways of using handlers chain:
 
 ```javascript
