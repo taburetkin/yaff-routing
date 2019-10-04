@@ -1,0 +1,37 @@
+{
+	"name": "fe-routing-js",
+	"version": "1.0.0",
+	"description": "javascript routing",
+	"main": "index.js",
+	"module": "index.js",
+	"author": "dimtabu <dima.taburetkin@gmail.com>",
+	"license": "MIT",
+	"_moduleAliases": {
+		"eventsjs": "../events",
+		"es6-utils": "../../libs/es6-utils"
+	},
+	"scripts": {
+		"test-w": "mocha -w  --require esm --config ./test/.mocharc.json",
+		"test": "mocha  --require esm --config ./test/.mocharc.json",
+		"coverage": "nyc npm run test",
+		"coveralls": "yarn coverage && nyc --reporter=text-lcov npm run test | coveralls"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.6.0",
+		"@babel/plugin-transform-runtime": "^7.6.0",
+		"@babel/preset-env": "^7.6.0",
+		"@babel/register": "^7.6.0",
+		"@babel/runtime": "^7.6.0",
+		"chai": "^4.2.0",
+		"chai-as-promised": "^7.1.1",
+		"coveralls": "^3.0.6",
+		"cross-env": "^5.2.1",
+		"eslint": "^6.3.0",
+		"esm": "^3.2.25",
+		"mocha": "^6.2.0",
+		"module-alias": "^2.2.1",
+		"nyc": "^14.1.1",
+		"sinon": "^7.4.2",
+		"sinon-chai": "^3.3.0"
+	}
+}
