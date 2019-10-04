@@ -1,6 +1,6 @@
 {
 	"checkLeaks": true,
-	"file": "./test/setup.node.js",
+	"file": "./test/setup.esm.js",
 	"recursive": true,
 	"reporter": "dot",
 	"require": ["module-alias/register"],

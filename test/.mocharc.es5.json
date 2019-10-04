@@ -1,0 +1,9 @@
+{
+	"checkLeaks": true,
+	"file": "./test/setup.es5.js",
+	"recursive": true,
+	"reporter": "dot",
+	"require": ["module-alias/register"],
+	"spec": "./test/unit/",
+	"ui": "bdd"
+}

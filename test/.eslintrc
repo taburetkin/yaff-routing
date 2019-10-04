@@ -9,6 +9,9 @@
 	  "new-cap": 0,
 	  "no-new": 0,
 	  "no-console": 0
-	}
+	},
+  "globals": {
+    "routing": true
   }
+}
   

@@ -7,8 +7,11 @@
 	"author": "dimtabu <dima.taburetkin@gmail.com>",
 	"license": "MIT",
 	"scripts": {
-		"test-w": "mocha -w  --require esm --config ./test/.mocharc.json",
-		"test": "mocha  --require esm --config ./test/.mocharc.json",
+    "build": "rollup --config",
+		"test": "mocha --require esm --config ./test/.mocharc.raw.json",
+		"test-w": "mocha -w --require esm --config ./test/.mocharc.raw.json",
+    "test-es5": "mocha --require esm --config ./test/.mocharc.es5.json",
+    "test-esm": "mocha --require esm --config ./test/.mocharc.esm.json",
 		"coverage": "nyc npm run test",
 		"coveralls": "yarn coverage && nyc --reporter=text-lcov npm run test | coveralls"
 	},
@@ -28,6 +31,7 @@
 		"module-alias": "^2.2.1",
 		"nyc": "^14.1.1",
 		"rollup": "^1.23.0",
+		"rollup-plugin-babel": "^4.3.3",
 		"sinon": "^7.4.2",
 		"sinon-chai": "^3.3.0"
 	}
