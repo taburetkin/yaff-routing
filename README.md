@@ -72,9 +72,11 @@ function validate(req, res, next) {
 	// we expect the id be a number
 	if (isNaN(articleId)) {
 		//setting up `notfound` error in response object;
+		//end stoping the process by not calling `next`
 		res.notFound();
+	} else {
+		next();
 	}
-	next();
 }
 
 async function fetchArticle(req, res, next) {
