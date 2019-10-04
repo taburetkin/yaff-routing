@@ -76,46 +76,46 @@ Next snipet illustrates one of possible ways of using handlers chain:
 import { routing } from 'fe-routing-js';
 
 function validate(req, res, next) {
-	let articleId = parseInt(req.args.id, 10);
-	// we expect the id be a number
-	if (isNaN(articleId)) {
-	  //setting up `notfound` error in response object;
-		//end stoping the process by not calling `next`
-	  res.notFound();
-	} else {
-		next();
-	}
+  let articleId = parseInt(req.args.id, 10);
+  // we expect the id be a number
+  if (isNaN(articleId)) {
+    //setting up `notfound` error in response object;
+    //end stoping the process by not calling `next`
+    res.notFound();
+  } else {
+    next();
+  }
 }
 
 async function fetchArticle(req, res, next) {
-	try {
-		// fetching the article from the backend;
-		let article = await fetch('/api/articles/' + req.args.id);
-		//putting the article into response object
-		res.locals.article = article;
-		next();
+  try {
+    // fetching the article from the backend;
+    let article = await fetch('/api/articles/' + req.args.id);
+    //putting the article into response object
+    res.locals.article = article;
+    next();
 
-	} catch(e) {
-		res.setError(e);
-	}
+  } catch(e) {
+    res.setError(e);
+  }
 }
 
 function showArticle(req, res) {
-	console.log(res.locals.article);
+  console.log(res.locals.article);
 }
 
 routing.get('articles/:id', validate, fetchArticle, showArticle);
 
 // starting routing with redefined notfound and default error handler
 routing.start({
-	errorHandlers: {
-		notfound() {
-		  console.log('the article you are looking for is not found');
-		}
-		default(err) {
-		  console.log('there was an error', err);
-		}
-	}
+  errorHandlers: {
+    notfound() {
+      console.log('the article you are looking for is not found');
+    }
+    default(err) {
+      console.log('there was an error', err);
+    }
+  }
 });
 
 ```
@@ -271,8 +271,8 @@ Starts the routing with given options.
 
 ```
 options = {
-	pushState: bool, optional, true by default
-	errorHandlers: object, optional
+  pushState: bool, optional, true by default
+  errorHandlers: object, optional
 }
 ```
 
