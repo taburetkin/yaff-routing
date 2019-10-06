@@ -120,7 +120,7 @@ class Routing {
       return;
     }
     let routeHandler = this._ensureRouteHanlder(path);
-    routeHandler.addHandlers(middlewares, unshift);
+    routeHandler.addMiddlewares(middlewares, unshift);
     return routeHandler;
   }
 
@@ -152,7 +152,7 @@ class Routing {
         this.routes.remove(routeHandler);
       } else {
         /** removing routeHandler's middleware */
-        routeHandler.remove(middleware);
+        routeHandler.removeMiddleware(middleware);
       }
       return routeHandler;
     }
@@ -166,25 +166,6 @@ class Routing {
     }
     return routeHandler;
   }
-  // _getRouteHandler(path) {
-  //   return this._routesByPath[path];
-  // }
-  // _addRouteHanlder(path) {
-  //   let routeHandler = new config.RouteHandler(path);
-  //   this.routes.add(routeHandler);
-  //   // this._routesByPath[path] = routeHandler;
-  //   // this._routes.push(routeHandler);
-  //   return routeHandler;
-  // }
-
-  // _removeRouteHandler(path) {
-  //   let routeHandler = this._routesByPath[path];
-  //   if (!routeHandler) return;
-  //   let index = this._routes.indexOf(routeHandler);
-  //   delete this._routesByPath[path];
-  //   this._routes.splice(index, 1);
-  //   return routeHandler;
-  // }
 
   _removeGlobalMiddleware(middleware) {
     let index = this._globalMiddlewares.indexOf(middleware);
@@ -304,6 +285,20 @@ class Routing {
     }
     return 'default';
   }
+
+  /**
+   * Initializes errorHandlers hash.
+   * @param {boolean} shouldReplace Indicates should errorHandlers be replaced or merged
+   * @param  {...Object.<string, function>} handlers Objects literals to merge or replace with
+   * @private
+   */
+  setErrorHandlers(shouldReplace, ...handlers) {
+    if (!shouldReplace) {
+      handlers.unshift(this._errorHandlers);
+    }
+    this._errorHandlers = Object.assign({}, ...handlers);
+  }
+
   //#endregion
 
   //#region navigate section
@@ -382,19 +377,6 @@ class Routing {
   //#endregion
 
   //#region helpers
-
-  /**
-   * Initializes errorHandlers hash.
-   * @param {boolean} shouldReplace Indicates should errorHandlers be replaced or merged
-   * @param  {...Object.<string, function>} handlers Objects literals to merge or replace with
-   * @private
-   */
-  setErrorHandlers(shouldReplace, ...handlers) {
-    if (!shouldReplace) {
-      handlers.unshift(this._errorHandlers);
-    }
-    this._errorHandlers = Object.assign({}, ...handlers);
-  }
 
   /**
    * Ensures if routing started or not.

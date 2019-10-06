@@ -6,7 +6,7 @@ class RouteHandler {
     this.url = this._getUrl(url);
     this.path = this._buildPath();
     this.pattern = this._buildPattern();
-    this.handlers = [];
+    this.middlewares = [];
   }
   _getUrl(url) {
     return getUrl(url);
@@ -26,38 +26,46 @@ class RouteHandler {
     return new RegExp('^' + route + '(?:\\?([\\s\\S]*))?$');
   }
 
-  addHandlers(handlers) {
-    for (let handler of handlers) {
-      this.addHandler(handler);
+  addMiddlewares(middlewares) {
+    for (let middleware of middlewares) {
+      this.addMiddleware(middleware);
     }
   }
-  addHandler(handler) {
-    if (typeof handler !== 'function') {
-      throw new Error('handler must be a function');
+  addMiddleware(middleware) {
+    if (typeof middleware !== 'function') {
+      throw new Error('middleware must be a function');
     }
-    this.handlers.push(handler);
+    this.middlewares.push(middleware);
   }
-  removeHandler(handler) {
-    let index = this.handlers.indexOf(handler);
+  removeMiddleware(middleware) {
+    let index = this.middlewares.indexOf(middleware);
     if (index < 0) return;
-    this.handlers.splice(index, 1);
-    return handler;
+    this.middlewares.splice(index, 1);
+    return middleware;
   }
-  removeHandlers(handlers) {
-    if (!handlers) {
-      this.handlers.length = 0;
+  removeMiddlewares(middlewares) {
+    if (middlewares == null) {
+      this.middlewares.length = 0;
       return;
     }
-    for (let handler of handlers) {
-      this.removeHandler(handler);
+    if (!Array.isArray(middlewares)) {
+      throw new Error('argument is not an array');
+    }
+    for (let middleware of middlewares) {
+      this.removeMiddleware(middleware);
     }
   }
+
+  hasMiddleware(middleware) {
+    return this.middlewares.indexOf(middleware) > -1;
+  }
+
   async processRequest(req, res, options = {}) {
     this.prepareRequestContext(req);
 
     let { globalMiddlewares = [] } = options;
 
-    let handlers = [...globalMiddlewares, ...this.handlers];
+    let handlers = [...globalMiddlewares, ...this.middlewares];
 
     let handler = this._createNextHandler(req, res, handlers);
 

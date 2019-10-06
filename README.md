@@ -55,7 +55,7 @@ routing.get(
   (req, res, next) => {
     console.log('this is first middleware');
 
-    //if you need to proceed to the next handler
+    //if you need to proceed to the next middleware
     //you should call next()
     next();
   },
@@ -123,26 +123,26 @@ routing.start({
 
 #### request processing
 
-In the middle of handlers chain you have to call `next()` to invoke next handler.
+In the middle of middlewares chain you have to call `next()` to invoke next middleware.
 
 ```javascript
-const handler = (req, res, next) => {
+const middleware = (req, res, next) => {
   if (shouldStopPrecessing) {
     return; // will stop processing the request
   } else {
-    next(); // will execute next handler in the handlers chain
+    next(); // will execute next middleware in the middlewares chain
   }
 };
 ```
 
 ### Common middleware
 
-Sometimes you have to define common handler for all your routes
+Sometimes you have to define common middleware for all your routes
 
 ```javascript
 import { routing } from 'fe-routing-js';
 
-//this handler will be executed on each route
+//this middleware will be executed on each route
 function logger(req) {
   console.log('the path is', req.path);
 }
@@ -152,18 +152,20 @@ routing.use(logger);
 
 ### Error handling
 
-Sometimes you have to setup an error during processing the request.
-And there are three default handlers
-`notfound`, `notallowed` and `default`
-Btw, you can setup as many different handlers as you need.
+Sometimes you have to setup an error during processing the request.  
+By default there is no any handlers nad you have to define it by your own.  
+In case there is no routeHandler for precessing request the `notfound` handler will be invoked.
+In case the `response.error` is instance of `Error` then `exception` handler will be invoked.  
+In case there is no error handler found then `default` handler will be invoked.
 
 ```javascript
 routing.use((req, res, next) => {
   // custom error
-  // all errors instances of Error will be processed with default handler
+  // all errors instances of Error will be processed with `exception` handler, in case you define it.
   res.setError(new Error('some error'));
 
   // notallowed handler
+  // will try to invoke `notallowed` handler and if it does not exist then `default` handler
   res.setError('notallowed');
 
   // or with shorthand
@@ -195,15 +197,15 @@ routing.start({
 });
 ```
 
-### Understanding route handler order
+### Understanding route middlewares order
 
-Each routehandler executes defined callbacks in this order:  
-global handlers, then ruote handler  
+Each routeHandler executes middlewares in this order:  
+global middlewares, then ruote middlewares  
 `global1 -> global2 -> route1 -> route2`
 
-#### Adding and removing global handlers.
+#### Adding and removing global middleware.
 
-Global handlers always added to the end of the globals array.
+Global middlewares always added to the end of the globals array.
 First added - first called.
 
 ```javascript
@@ -222,14 +224,14 @@ routing.remove(globalHandler2);
 // globalHandler1 -> globalHandler3
 ```
 
-#### Route handlers
+#### Route middlewares
 
-Route handlers can be added in two ways  
-`routing.get(route, handlerOne, handlerTwo)` - adds handler to the end of route's handler array  
-`routing.use(route, handler)` - adds handler to the begining of route's array
+Route middlewares can be added in two ways  
+`routing.get(route, middlewareOne, middlewareTwo)` - adds middlewares to the end of route's middlewares array  
+`routing.use(route, middleware)` - adds middleware to the begining of route's array
 
 ```javascript
-// global handlers are defined in previous example
+// global middleware are defined in previous example
 
 const routeHandler1 = (req, res, next) => next();
 const routeHandler2 = (req, res, next) => next();
@@ -247,7 +249,7 @@ routing.remove('somepage', routeHandler3);
 // execution order for /somepage is
 // handler1 -> handler3 -> routeHandler1 -> routeHandler2
 
-// Now lets add handler before
+// Now lets add middleware before
 // for this we will use `routing.use` instead of `routing.get`
 routing.use('somepage', routeHandler3);
 // execution order for /somepage is
@@ -289,22 +291,22 @@ Returns true if routing started
 
 Registers the route if it's not and adds route handlers.
 
-#### use(handler)
+#### use(middleware)
 
-Register global handler.
+Register global middleware.
 
-#### use(routeString, handler)
+#### use(routeString, middleware)
 
-Registers the route if it's not and unshift handler to the route's handler chain.
+Registers the route if it's not and unshift middleware to the route's middlewares chain.
 
-#### remove(handler)
+#### remove(middleware)
 
-Removes global handler.
+Removes global middleware.
 
-#### remove(routeString, handler)
+#### remove(routeString, middleware)
 
-Removes route's handler.
+Removes route's middleware.
 
 #### navigate(url, options)
 
-Invokes the "request" on given url. Changes browser location and invokes registered callbacks for the route.
+Invokes the "request" on given url. Changes browser location and invokes registered middlewares for the route.
