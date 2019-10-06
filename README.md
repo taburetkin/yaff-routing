@@ -1,4 +1,4 @@
-# fe-routing-js
+# fe-routing-js (under development)
 
 This is a small lib which helps to setup route based handlers.  
 The API is pretty similar to nodejs express and supposed to be used in a browser with pushState.  
