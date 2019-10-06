@@ -1,27 +1,28 @@
 # fe-routing-js
 
 This is a small lib which helps to setup route based handlers.  
-The API is pretty similar to nodejs express and supposed to be used in a browser with pushState (enabled by default) but old school hash based routes supported too.
+The API is pretty similar to nodejs express and supposed to be used in a browser with pushState.  
+Also supports oldschool hash based routes too.
 
 ## How to use
 
 ### Simple use case:
 
 ```javascript
-import { routing } from "fe-routing-js";
+import { routing } from 'fe-routing-js';
 
-//define handler for root page http://localhost
-routing.get("", () => {
-  console.log("this is main page");
+//define middleware for root page http://localhost
+routing.get('', () => {
+  console.log('this is main page');
 });
 
-//define handler for articles page http://localhost/articles
-routing.get("articles", () => {
-  console.log("this is articles page");
+//define middleware for articles page http://localhost/articles
+routing.get('articles', () => {
+  console.log('this is articles page');
 });
 
-//define handler for article page http://localhost/articles/[id]
-routing.get("articles/:id", req => {
+//define middleware for article page http://localhost/articles/[id]
+routing.get('articles/:id', req => {
   let articleId = req.args.id;
   console.log(`this is article page with id ${articleId}`);
 });
@@ -30,7 +31,7 @@ routing.get("articles/:id", req => {
 routing.start();
 
 // changes browser location and invokes all registered handlers
-routing.navigate("articles/123");
+routing.navigate('articles/123');
 ```
 
 ### Starting routing
@@ -44,33 +45,33 @@ routing.start();
 
 ### Handlers chain
 
-As in nodejs express routing you can setup multiple handlers for each route, they will be executed in order.
+As in nodejs express routing you can setup multiple middlewares for each route, they will be executed in order.
 
 ```javascript
-import { routing } from "fe-routing-js";
+import { routing } from 'fe-routing-js';
 
 routing.get(
-  "some/deep/route",
+  'some/deep/route',
   (req, res, next) => {
-    console.log("this is first handler");
+    console.log('this is first middleware');
 
     //if you need to proceed to the next handler
     //you should call next()
     next();
   },
   (req, res, next) => {
-    console.log("this is second handler");
+    console.log('this is second middleware');
     next();
   },
   () => {
-    console.log("this is last handler");
+    console.log('this is last middleware');
   }
 );
 ```
 
 #### Usecase
 
-Next snipet illustrates one of possible ways of using handlers chain:
+Next snipet illustrates one of possible ways of using middlewares chain:
 
 ```javascript
 import { routing } from 'fe-routing-js';
@@ -106,7 +107,7 @@ function showArticle(req, res) {
 
 routing.get('articles/:id', validate, fetchArticle, showArticle);
 
-// starting routing with redefined notfound and default error handler
+// starting routing with defined notfound and default error handler
 routing.start({
   errorHandlers: {
     notfound() {
@@ -139,11 +140,11 @@ const handler = (req, res, next) => {
 Sometimes you have to define common handler for all your routes
 
 ```javascript
-import { routing } from "fe-routing-js";
+import { routing } from 'fe-routing-js';
 
 //this handler will be executed on each route
 function logger(req) {
-  console.log("the path is", req.path);
+  console.log('the path is', req.path);
 }
 
 routing.use(logger);
@@ -160,20 +161,20 @@ Btw, you can setup as many different handlers as you need.
 routing.use((req, res, next) => {
   // custom error
   // all errors instances of Error will be processed with default handler
-  res.setError(new Error("some error"));
+  res.setError(new Error('some error'));
 
   // notallowed handler
-  res.setError("notallowed");
+  res.setError('notallowed');
 
   // or with shorthand
   res.notAllowed(); //which internally do the same
 
   // notfound handler
-  res.setError("notfound");
+  res.setError('notfound');
   res.notFound(); // or this one
 
   // setting custom handler
-  res.setError("myOwnHandler");
+  res.setError('myOwnHandler');
 });
 
 routing.start({
@@ -234,21 +235,21 @@ const routeHandler1 = (req, res, next) => next();
 const routeHandler2 = (req, res, next) => next();
 const routeHandler3 = (req, res, next) => next();
 
-routing.get("somepage", routeHandler1, routeHandler2);
+routing.get('somepage', routeHandler1, routeHandler2);
 // execution order for /somepage is
 // handler1 -> handler3 -> routeHandler1 -> routeHandler2
 
-routing.get("somepage", routeHandler3);
+routing.get('somepage', routeHandler3);
 // execution order for /somepage is
 // handler1 -> handler3 -> routeHandler1 -> routeHandler2 -> routeHandler3
 
-routing.remove("somepage", routeHandler3);
+routing.remove('somepage', routeHandler3);
 // execution order for /somepage is
 // handler1 -> handler3 -> routeHandler1 -> routeHandler2
 
 // Now lets add handler before
 // for this we will use `routing.use` instead of `routing.get`
-routing.use("somepage", routeHandler3);
+routing.use('somepage', routeHandler3);
 // execution order for /somepage is
 // handler1 -> handler3 -> routeHandler3 -> routeHandler1 -> routeHandler2
 ```

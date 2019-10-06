@@ -14,11 +14,11 @@ export function getUrl(url) {
   return new URL(url, document.location.origin);
 }
 
-export function buildPath(url, pushState) {
+export function buildPath(url, useHashes) {
   url = getUrl(url);
-  if (pushState) {
-    return url.pathname + url.search + url.hash;
-  } else {
+  if (useHashes) {
     return url.hash.substring(1);
+  } else {
+    return url.pathname + url.search + url.hash;
   }
 }

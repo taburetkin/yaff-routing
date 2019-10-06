@@ -1,5 +1,5 @@
-import { getUrl, buildPath } from "./utils";
-import config from "./config";
+import { getUrl, buildPath } from './utils';
+import config from './config';
 
 class RouteHandler {
   constructor(url) {
@@ -12,18 +12,18 @@ class RouteHandler {
     return getUrl(url);
   }
   _buildPath() {
-    return buildPath(this.url, config.pushState);
+    return buildPath(this.url, config.useHashes);
   }
   _buildPattern() {
     let o = this.regexOptions;
     let route = this.path
-      .replace(o.escapeRegExp, "\\$&")
-      .replace(o.optionalParam, "(?:$1)?")
+      .replace(o.escapeRegExp, '\\$&')
+      .replace(o.optionalParam, '(?:$1)?')
       .replace(o.namedParam, function(match, optional) {
-        return optional ? match : "([^/?]+)";
+        return optional ? match : '([^/?]+)';
       })
-      .replace(o.splatParam, "([^?]*?)");
-    return new RegExp("^" + route + "(?:\\?([\\s\\S]*))?$");
+      .replace(o.splatParam, '([^?]*?)');
+    return new RegExp('^' + route + '(?:\\?([\\s\\S]*))?$');
   }
 
   addHandlers(handlers) {
@@ -32,8 +32,8 @@ class RouteHandler {
     }
   }
   addHandler(handler) {
-    if (typeof handler !== "function") {
-      throw new Error("handler must be a function");
+    if (typeof handler !== 'function') {
+      throw new Error('handler must be a function');
     }
     this.handlers.push(handler);
   }
@@ -54,8 +54,13 @@ class RouteHandler {
   }
   async processRequest(req, res, options = {}) {
     this.prepareRequestContext(req);
-    let handlers = [...(options.globalHandlers || []), ...this.handlers];
+
+    let { globalMiddlewares = [] } = options;
+
+    let handlers = [...globalMiddlewares, ...this.handlers];
+
     let handler = this._createNextHandler(req, res, handlers);
+
     return await handler();
   }
   _createNextHandler(req, res, handlers) {

@@ -2,7 +2,8 @@ import { getUrl, buildPath } from "./utils";
 import config from "./config";
 
 class RequestContext {
-  constructor(url) {
+  constructor(url, options) {
+    this.options = options;
     this.url = this._getUrl(url);
     this.path = this._buildPath();
     this.args = {};
@@ -12,7 +13,7 @@ class RequestContext {
     return getUrl(url);
   }
   _buildPath() {
-    return buildPath(this.url, config.pushState);
+    return buildPath(this.url, config.useHashes);
   }
   _buildSearch() {
     let query = {};

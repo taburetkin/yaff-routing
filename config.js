@@ -1,6 +1,15 @@
-export default {
-	// default routing options
-	routingOptions: void 0,
-	// when false will use hashes #path
-	pushState: true,
-}
+const config = {
+  /** options for initializing the Routing instance */
+  routingOptions: {},
+
+  /** use hashes instead of urls */
+  useHashes: false,
+
+  /**
+   * indicates if routing started
+   * @private
+   */
+  isStarted: false
+};
+
+export default config;
