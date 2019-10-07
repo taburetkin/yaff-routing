@@ -21,6 +21,8 @@
 		"@babel/preset-env": "^7.6.0",
 		"@babel/register": "^7.6.0",
 		"@babel/runtime": "^7.6.0",
+		"babel-plugin-external-helpers": "^6.22.0",
+		"babel-plugin-transform-regenerator": "^6.26.0",
 		"chai": "^4.2.0",
 		"chai-as-promised": "^7.1.1",
 		"coveralls": "^3.0.6",
@@ -37,5 +39,9 @@
 		"rollup-plugin-babel-minify": "^9.1.0",
 		"sinon": "^7.4.2",
 		"sinon-chai": "^3.3.0"
+	},
+	"dependencies": {
+		"core-js": "^3.2.1",
+		"regenerator-runtime": "^0.13.3"
 	}
 }

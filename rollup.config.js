@@ -1,5 +1,5 @@
 const babel = require('rollup-plugin-babel');
-const minify = require('rollup-plugin-babel-minify');
+//const minify = require('rollup-plugin-babel-minify');
 
 module.exports = [
   {
@@ -12,16 +12,36 @@ module.exports = [
   {
     input: './index.js',
     output: {
+      file: './lib/fe.routing.umd.js',
+      format: 'umd',
+      name: 'routing'
+    }
+  },
+
+  {
+    input: './index.js',
+    output: {
       file: './lib/fe.routing.es5.umd.js',
       format: 'umd',
       name: 'routing'
     },
     plugins: [
       babel({
-        exclude: 'node_modules/**', // only transpile our source code,
-        runtimeHelpers: true
-      }),
-      minify()
+        babelrc: false,
+        presets: [
+          [
+            '@babel/preset-env',
+            {
+              modules: false,
+              targets: {
+                chrome: '58',
+                ie: '11'
+              },
+              useBuiltIns: 'usage' //enables babel and import babel into your inputFile.js
+            }
+          ]
+        ]
+      })
     ]
   }
 ];
