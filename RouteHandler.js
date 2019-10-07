@@ -9,7 +9,7 @@ class RouteHandler {
     this.middlewares = [];
   }
   _getUrl(url) {
-    return getUrl(url);
+    return getUrl(url, config.useHashes);
   }
   _buildPath() {
     return buildPath(this.url, config.useHashes);

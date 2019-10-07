@@ -1,25 +1,27 @@
-const babel = require("rollup-plugin-babel");
+const babel = require('rollup-plugin-babel');
+const minify = require('rollup-plugin-babel-minify');
 
 module.exports = [
   {
-    input: "./index.js",
+    input: './index.js',
     output: {
-      file: "./lib/fe.routing.esm.js",
-      format: "esm"
+      file: './lib/fe.routing.esm.js',
+      format: 'esm'
     }
   },
   {
-    input: "./index.js",
+    input: './index.js',
     output: {
-      file: "./lib/fe.routing.es5.umd.js",
-      format: "umd",
-      name: "routing"
+      file: './lib/fe.routing.es5.umd.js',
+      format: 'umd',
+      name: 'routing'
     },
     plugins: [
       babel({
-        exclude: "node_modules/**", // only transpile our source code,
+        exclude: 'node_modules/**', // only transpile our source code,
         runtimeHelpers: true
-      })
+      }),
+      minify()
     ]
   }
 ];

@@ -1,5 +1,5 @@
-import { getUrl, buildPath } from "./utils";
-import config from "./config";
+import { getUrl, buildPath } from './utils';
+import config from './config';
 
 class RequestContext {
   constructor(url, options) {
@@ -8,9 +8,12 @@ class RequestContext {
     this.path = this._buildPath();
     this.args = {};
     this.search = this._buildSearch();
+    if (options && options.state) {
+      this.state = options.state;
+    }
   }
   _getUrl(url) {
-    return getUrl(url);
+    return getUrl(url, config.useHashes);
   }
   _buildPath() {
     return buildPath(this.url, config.useHashes);

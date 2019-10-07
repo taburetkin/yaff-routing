@@ -1,4 +1,4 @@
-export function getUrl(url) {
+export function getUrl(url, useHashes) {
   if (url == null) {
     return new URL(document.location.toString());
   } else if (url instanceof URL) {
@@ -7,17 +7,28 @@ export function getUrl(url) {
     return new URL(url);
   }
 
-  if (!url.toString().startsWith("/")) {
-    url = "/" + url;
+  url = leadingSlash(url);
+
+  if (useHashes) {
+    url = document.location.pathname + document.location.search + '#' + url;
   }
 
   return new URL(url, document.location.origin);
 }
 
+function leadingSlash(url) {
+  url = url.toString();
+  if (!url.startsWith('/')) {
+    url = '/' + url;
+  }
+  return url;
+}
+
 export function buildPath(url, useHashes) {
-  url = getUrl(url);
+  url = getUrl(url, useHashes);
   if (useHashes) {
-    return url.hash.substring(1);
+    let hash = url.hash.substring(1);
+    return hash;
   } else {
     return url.pathname + url.search + url.hash;
   }

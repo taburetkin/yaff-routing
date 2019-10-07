@@ -1,6 +1,7 @@
 import config from './config';
 import { getUrl } from './utils';
 import RoutesManager from './RoutesManager';
+let stateCounter = 0;
 
 /**
  * @typedef {Object} startOptions
@@ -42,12 +43,23 @@ class Routing {
         options.errorHandlers
       );
     }
-    config.useHashes = options.useHashes === true;
-
-    if (options.trigger !== false) {
-      this.navigate(options);
+    if (options.useHashes != null) {
+      config.useHashes = options.useHashes === true;
     }
+    let navigateOptions = Object.assign({}, options, { pushState: false });
+    if (options.trigger !== false) {
+      this.navigate(navigateOptions);
+    }
+    this._setOnPopstate(navigateOptions);
     return this;
+  }
+
+  _setOnPopstate(opts) {
+    window.onpopstate = event => {
+      let navOpts = { ...opts };
+      navOpts.state = event.state;
+      this.navigate(navOpts);
+    };
   }
 
   /**
@@ -57,6 +69,7 @@ class Routing {
    */
   stop() {
     config.isStarted = false;
+    window.onpopstate = null;
     return this;
   }
 
@@ -326,7 +339,9 @@ class Routing {
       this._processRequest(url, options);
     }
     this.setCurrentUrl(url);
-    this.browserPushState(url, options);
+    if (options.pushState !== false) {
+      this.browserPushState(url, options);
+    }
     return true;
   }
 
@@ -372,7 +387,9 @@ class Routing {
    * @memberof Routing
    */
   getCurrentState() {
-    return {};
+    return {
+      counter: ++stateCounter
+    };
   }
   //#endregion
 
@@ -402,7 +419,7 @@ class Routing {
    * @private
    */
   _getUrl(url) {
-    return getUrl(url);
+    return getUrl(url, config.useHashes);
   }
 
   /**

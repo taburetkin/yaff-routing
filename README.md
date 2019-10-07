@@ -1,4 +1,4 @@
-# fe-routing-js (under development)
+# fe-routing-js (under testing)
 
 This is a small lib which helps to setup route based handlers.  
 The API is pretty similar to nodejs express and supposed to be used in a browser with pushState.  
@@ -153,7 +153,7 @@ routing.use(logger);
 ### Error handling
 
 Sometimes you have to setup an error during processing the request.  
-By default there is no any handlers nad you have to define it by your own.  
+By default there is no any handlers and you have to define it by your own.  
 In case there is no routeHandler for precessing request the `notfound` handler will be invoked.
 In case the `response.error` is instance of `Error` then `exception` handler will be invoked.  
 In case there is no error handler found then `default` handler will be invoked.
