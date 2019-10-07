@@ -38,22 +38,33 @@ class Routing {
     config.isStarted = true;
 
     if (options.errorHandlers) {
+      //applying errorHandlers if any
       this.setErrorHandlers(
         options.replaceErrorHandlers,
         options.errorHandlers
       );
     }
+
     if (options.useHashes != null) {
+      //update routing useHashes flag
       config.useHashes = options.useHashes === true;
     }
+
     let navigateOptions = Object.assign({}, options, { pushState: false });
     if (options.trigger !== false) {
+      //triggering middlewares only if trigger is not disallowed.
       this.navigate(navigateOptions);
     }
     this._setOnPopstate(navigateOptions);
     return this;
   }
 
+  /**
+   * Sets onpopstate handler to reflect on history go forward/back.
+   * @param {object} opts
+   * @private
+   * @memberof Routing
+   */
   _setOnPopstate(opts) {
     window.onpopstate = event => {
       let navOpts = { ...opts };
@@ -74,7 +85,7 @@ class Routing {
   }
 
   /**
-   * Returns routing state
+   * Returns routing state. True if started
    * @return {boolean}
    */
   isStarted() {

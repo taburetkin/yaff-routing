@@ -1,8 +1,6 @@
 # fe-routing-js (under testing)
 
-This is a small lib which helps to setup route based handlers.  
-The API is pretty similar to nodejs express and supposed to be used in a browser with pushState.  
-Also supports oldschool hash based routes too.
+Simple frontend routing with pretty similar to nodejs express API.
 
 ## How to use
 
@@ -71,7 +69,7 @@ routing.get(
 
 #### Usecase
 
-Next snipet illustrates one of possible ways of using middlewares chain:
+Next example illustrates one of possible ways of using middlewares chain:
 
 ```javascript
 import { routing } from 'fe-routing-js';
