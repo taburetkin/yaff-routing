@@ -43,7 +43,7 @@ You can define route handlers at any time during application lifecycle, but you 
 routing.start();
 ```
 
-### Handlers chain
+### Middlewares chain
 
 As in nodejs express routing you can setup multiple middlewares for each route, they will be executed in order.
 
