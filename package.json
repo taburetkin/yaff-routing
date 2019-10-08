@@ -1,6 +1,6 @@
 {
 	"name": "fe-routing-js",
-	"version": "0.0.10",
+	"version": "0.0.11",
 	"description": "javascript front-end routing pack",
 	"main": "index.js",
 	"module": "index.js",
