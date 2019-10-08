@@ -1,3 +1,4 @@
+/** @namespace */
 const config = {
   /** options for initializing the Routing instance */
   routingOptions: {},

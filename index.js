@@ -8,8 +8,8 @@ config.Routing = Routing;
 config.RouteHandler = RouteHandler;
 config.RequestContext = RequestContext;
 config.ResponseContext = ResponseContext;
-
-export default {
+/** @namespace */
+const routing = {
   /**
    * Returns current routing instance. If it does not exist instance will be created.
    * @private
@@ -74,3 +74,5 @@ export default {
   },
   config
 };
+
+export default routing;

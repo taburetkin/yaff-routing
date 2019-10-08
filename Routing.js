@@ -12,12 +12,14 @@ let stateCounter = 0;
  */
 
 /**
+ * This is a Main class, initialized once per application.
+ * Manipulates existing routeHandlers, global middlewares and processes the requests
+ * @prop {RoutesManager} routes - Holds all registered routeHandlers
  * @class Routing
  */
 class Routing {
   constructor(options = {}) {
     this.options = { ...options };
-    this._routesByPath = {};
     this.routes = new RoutesManager();
     this._globalMiddlewares = [];
     this.setErrorHandlers(this.errorHandlers, options.errorHandlers);
@@ -26,7 +28,7 @@ class Routing {
   /**
    * Starts routing with given options
    * @param {startOptions} options
-   * @returns {Routing}
+   * @returns {Routing} Routing instance
    * @memberof Routing
    */
   start(options) {
@@ -182,6 +184,14 @@ class Routing {
     }
   }
 
+  /**
+   * Ensures there is a routeHandler for given url
+   * Otherwise create a new one and stores it in the `routes`
+   * @private
+   * @param {*} path
+   * @returns {RouteHandler}
+   * @memberof Routing
+   */
   _ensureRouteHanlder(path) {
     let routeHandler = this.routes.get(path);
     if (!routeHandler) {
@@ -224,6 +234,16 @@ class Routing {
     return new config.ResponseContext(req);
   }
 
+  /**
+   * Processes the request.
+   * Initializes RequestContext and ResponseContext instances and
+   * if there is an appropriate routeHandler delegates processing to routeHandler.
+   * Otherwise tries to invoke `notfound` errorHandler
+   * @private
+   * @param {(string|URL)} url
+   * @param {*} options
+   * @memberof Routing
+   */
   async _processRequest(url, options) {
     // creating requestContext and responseContext
     let req = this.createRequestContext(url, options);
@@ -243,9 +263,9 @@ class Routing {
   }
 
   /**
-   * Finds routehandler by requestcontext.
+   * Finds routehandler by requestContext.
    * Can also be used to find routehandler by path
-   * @param {(string, RequestContext)} req
+   * @param {(string|RequestContext)} req
    * @returns RouteHandler instance
    * @memberof Routing
    */
@@ -311,7 +331,7 @@ class Routing {
   }
 
   /**
-   * Initializes errorHandlers hash.
+   * Sets errorHandlers hash. By default merge exist errorHandlers with given
    * @param {boolean} shouldReplace Indicates should errorHandlers be replaced or merged
    * @param  {...Object.<string, function>} handlers Objects literals to merge or replace with
    * @private
@@ -394,7 +414,7 @@ class Routing {
    * Returns current state object, by default return empty object.
    * feel free to override.
    * method internaly used by `browserPushState`
-   * @returns
+   * @returns {object}
    * @memberof Routing
    */
   getCurrentState() {
@@ -409,10 +429,10 @@ class Routing {
   /**
    * Ensures if routing started or not.
    * Throws if routing isStarted equals to given value.
-   * @param {boolean} [value=false]
-   * @returns
-   * @memberof Routing
    * @private
+   * @param {boolean} [value=false]
+   * @returns {Routing}
+   * @memberof Routing
    */
   _ensureStarted(value = false) {
     let message = value ? 'already' : 'not yet';
@@ -425,7 +445,7 @@ class Routing {
   /**
    * wraps string url into URL
    * @param {string} url
-   * @returns URL
+   * @returns {URL}
    * @memberof Routing
    * @private
    */
@@ -434,10 +454,11 @@ class Routing {
   }
 
   /**
-   * Ensures arg is a RequestContext
-   * converts path string to the RequestContext instance
+   * Ensures arg is a RequestContext.
+   * Converts path string to the RequestContext instance.
+   * @private
    * @param {(string|RequestContext)} arg
-   * @returns RequestContext instance
+   * @returns {RequestContext} requestContext instance
    * @memberof Routing
    */
   _getReq(arg) {
