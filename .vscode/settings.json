@@ -9,5 +9,6 @@
   "[markdown]": {
     "editor.formatOnSave": true
   },
-  "prettier.singleQuote": true
+  "prettier.singleQuote": true,
+  "debug.node.autoAttach": "on"
 }
