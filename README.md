@@ -2,6 +2,8 @@
 
 Simple frontend routing with pretty similar to nodejs express API.
 
+[complete reference is here.](https://github.com/taburetkin/fe-routing-js/blob/master/reference.md)
+
 ## How to use
 
 ### Simple use case:
@@ -254,57 +256,4 @@ routing.use('somepage', routeHandler3);
 // handler1 -> handler3 -> routeHandler3 -> routeHandler1 -> routeHandler2
 ```
 
----
-
-# Reference
-
-## routing
-
-`import { routing } from 'fe-routing-js';`  
-The main thing.  
-In most cases it will be enough just use this api set.
-
-### routing methods:
-
-#### start(options)
-
-Starts the routing with given options.
-
-```
-options = {
-  pushState: bool, optional, true by default
-  errorHandlers: object, optional
-}
-```
-
-#### stop()
-
-Stops route handling.
-
-#### isStarted()
-
-Returns true if routing started
-
-#### get(routeString, handler1, handler2, ...)
-
-Registers the route if it's not and adds route handlers.
-
-#### use(middleware)
-
-Register global middleware.
-
-#### use(routeString, middleware)
-
-Registers the route if it's not and unshift middleware to the route's middlewares chain.
-
-#### remove(middleware)
-
-Removes global middleware.
-
-#### remove(routeString, middleware)
-
-Removes route's middleware.
-
-#### navigate(url, options)
-
-Invokes the "request" on given url. Changes browser location and invokes registered middlewares for the route.
+[complete reference is here.](https://github.com/taburetkin/fe-routing-js/blob/master/reference.md)
