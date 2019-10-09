@@ -2,7 +2,9 @@
 
 Simple frontend routing with pretty similar to nodejs express API.
 
-[complete reference is here.](https://github.com/taburetkin/fe-routing-js/blob/master/reference.md)
+## Reference
+
+For detailed reference [go here](https://github.com/taburetkin/fe-routing-js/blob/master/reference.md)
 
 ## How to use
 
@@ -68,8 +70,6 @@ routing.get(
   }
 );
 ```
-
-#### Usecase
 
 Next example illustrates one of possible ways of using middlewares chain:
 
@@ -256,4 +256,4 @@ routing.use('somepage', routeHandler3);
 // handler1 -> handler3 -> routeHandler3 -> routeHandler1 -> routeHandler2
 ```
 
-[complete reference is here.](https://github.com/taburetkin/fe-routing-js/blob/master/reference.md)
+[Take a look on detailed reference](https://github.com/taburetkin/fe-routing-js/blob/master/reference.md)
