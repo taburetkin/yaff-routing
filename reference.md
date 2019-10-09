@@ -11,13 +11,19 @@ By Default its only the thing you should use working with fe-routing-js</p>
 
 <dl>
 <dt><a href="#Routing">Routing</a></dt>
-<dd></dd>
+<dd><p>Manipulates existing routeHandlers, global middlewares and processes the requests</p>
+</dd>
 <dt><a href="#RouteHandler">RouteHandler</a></dt>
-<dd></dd>
+<dd><p>Represents handler for a given string route.
+When request occurs and request path matches handlres&#39;s route pattern
+then all registered middlewares beeing invoked.</p>
+</dd>
 <dt><a href="#RequestContext">RequestContext</a></dt>
-<dd></dd>
+<dd><p>Represents request state.</p>
+</dd>
 <dt><a href="#ResponseContext">ResponseContext</a></dt>
-<dd></dd>
+<dd><p>Represents response state.</p>
+</dd>
 </dl>
 
 ## Objects
@@ -33,6 +39,8 @@ You can provide your own versions of internal classes and setup some behavior.</
 
 <dl>
 <dt><a href="#startOptions">startOptions</a> : <code>Object</code></dt>
+<dd></dd>
+<dt><a href="#routingOptions">routingOptions</a> : <code>Object</code></dt>
 <dd></dd>
 </dl>
 
@@ -118,6 +126,8 @@ Initiates the request.Proxy method for Routing instance's `navigate`.
 <a name="Routing"></a>
 
 ## Routing
+Manipulates existing routeHandlers, global middlewares and processes the requests
+
 **Kind**: global class  
 **Properties**
 
@@ -127,7 +137,7 @@ Initiates the request.Proxy method for Routing instance's `navigate`.
 
 
 * [Routing](#Routing)
-    * [new Routing()](#new_Routing_new)
+    * [new Routing([options])](#new_Routing_new)
     * [.start(options)](#Routing+start) ⇒ [<code>Routing</code>](#Routing)
     * [.stop()](#Routing+stop) ⇒ [<code>Routing</code>](#Routing)
     * [.isStarted()](#Routing+isStarted) ⇒ <code>boolean</code>
@@ -149,8 +159,13 @@ Initiates the request.Proxy method for Routing instance's `navigate`.
 
 <a name="new_Routing_new"></a>
 
-### new Routing()
-This is a Main class, initialized once per application.Manipulates existing routeHandlers, global middlewares and processes the requests
+### new Routing([options])
+Creates an instance of Routing.
+
+
+| Param | Type | Default |
+| --- | --- | --- |
+| [options] | [<code>routingOptions</code>](#routingOptions) | <code>{}</code> | 
 
 <a name="Routing+start"></a>
 
@@ -357,6 +372,8 @@ Returns current state object, by default return empty object.feel free to overr
 <a name="RouteHandler"></a>
 
 ## RouteHandler
+Represents handler for a given string route.When request occurs and request path matches handlres's route patternthen all registered middlewares beeing invoked.
+
 **Kind**: global class  
 **Properties**
 
@@ -370,7 +387,7 @@ Returns current state object, by default return empty object.feel free to overr
 
 
 * [RouteHandler](#RouteHandler)
-    * [new RouteHandler()](#new_RouteHandler_new)
+    * [new RouteHandler(url)](#new_RouteHandler_new)
     * [.addMiddlewares(middlewares)](#RouteHandler+addMiddlewares)
     * [.addMiddleware(middleware)](#RouteHandler+addMiddleware)
     * [.removeMiddleware(middleware)](#RouteHandler+removeMiddleware) ⇒ <code>function</code> \| <code>void</code>
@@ -381,8 +398,13 @@ Returns current state object, by default return empty object.feel free to overr
 
 <a name="new_RouteHandler_new"></a>
 
-### new RouteHandler()
-Represents handler for a given string route.When request occurs and request path match handlres's route patternthen all registered middlewares beeing invoked.
+### new RouteHandler(url)
+Creates an instance of RouteHandler.
+
+
+| Param | Type |
+| --- | --- |
+| url | <code>string</code> \| <code>URL</code> | 
 
 <a name="RouteHandler+addMiddlewares"></a>
 
@@ -465,6 +487,8 @@ Test's given requestContext's string path against handler's route pattern.Retur
 <a name="RequestContext"></a>
 
 ## RequestContext
+Represents request state.
+
 **Kind**: global class  
 **Properties**
 
@@ -478,13 +502,19 @@ Test's given requestContext's string path against handler's route pattern.Retur
 
 
 * [RequestContext](#RequestContext)
-    * [new RequestContext()](#new_RequestContext_new)
+    * [new RequestContext(url, options)](#new_RequestContext_new)
     * [.setRouteArguments(args)](#RequestContext+setRouteArguments)
 
 <a name="new_RequestContext_new"></a>
 
-### new RequestContext()
-RequestContext represents current request state.Used for manipulating the request
+### new RequestContext(url, options)
+Creates an instance of RequestContext.
+
+
+| Param | Type |
+| --- | --- |
+| url | <code>string</code> \| <code>URL</code> | 
+| options | <code>\*</code> | 
 
 <a name="RequestContext+setRouteArguments"></a>
 
@@ -500,6 +530,8 @@ Merges route arguments with given object
 <a name="ResponseContext"></a>
 
 ## ResponseContext
+Represents response state.
+
 **Kind**: global class  
 **Properties**
 
@@ -511,7 +543,7 @@ Merges route arguments with given object
 
 
 * [ResponseContext](#ResponseContext)
-    * [new ResponseContext()](#new_ResponseContext_new)
+    * [new ResponseContext(req)](#new_ResponseContext_new)
     * [.isOk()](#ResponseContext+isOk) ⇒ <code>boolean</code>
     * [.setError(error)](#ResponseContext+setError) ⇒ [<code>ResponseContext</code>](#ResponseContext)
     * [.notFound()](#ResponseContext+notFound) ⇒ [<code>ResponseContext</code>](#ResponseContext)
@@ -519,8 +551,13 @@ Merges route arguments with given object
 
 <a name="new_ResponseContext_new"></a>
 
-### new ResponseContext()
-holds response state.
+### new ResponseContext(req)
+Creates an instance of ResponseContext.
+
+
+| Param | Type |
+| --- | --- |
+| req | [<code>RequestContext</code>](#RequestContext) | 
 
 <a name="ResponseContext+isOk"></a>
 
@@ -569,4 +606,14 @@ Routing configuration.You can provide your own versions of internal classes and
 | [errorHandlers] | <code>Object.&lt;string, function()&gt;</code> |  | Error handlers to set into Routing instance |
 | [replaceErrorHandlers] | <code>boolean</code> | <code>false</code> | Indicates how errorHandlers should be applied. default behavior is merge |
 | [useHashes] | <code>boolean</code> | <code>false</code> | Enables old school hash based routing |
+
+<a name="routingOptions"></a>
+
+## routingOptions : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [errorHandlers] | <code>Object.&lt;string, function()&gt;</code> | Error handlers to set into Routing instance |
 

@@ -3,16 +3,19 @@ import config from './config';
 
 /**
  * Represents handler for a given string route.
- * When request occurs and request path match handlres's route pattern
+ * When request occurs and request path matches handlres's route pattern
  * then all registered middlewares beeing invoked.
  * @prop {URL} url the URL instance of route
  * @prop {string} path string path of route
  * @prop {RegExp} pattern route's RegExp pattern
  * @prop {Object.<string, RegExp>} regexPatterns default RegExp patterns for maintaining routes and routes parameters
  * @prop {function[]} middlewares registerd route's middlewares
- * @class RouteHandler
  */
 class RouteHandler {
+  /**
+   *Creates an instance of RouteHandler.
+   * @param {(string|URL)} url
+   */
   constructor(url) {
     this.url = this._getUrl(url);
     this.path = this._buildPath();

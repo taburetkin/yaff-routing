@@ -12,12 +12,19 @@ let stateCounter = 0;
  */
 
 /**
- * This is a Main class, initialized once per application.
+ * @typedef {Object} routingOptions
+ * @prop {Object.<string, function>=} errorHandlers - Error handlers to set into Routing instance
+ */
+
+/**
  * Manipulates existing routeHandlers, global middlewares and processes the requests
  * @prop {RoutesManager} routes - Holds all registered routeHandlers
- * @class Routing
  */
 class Routing {
+  /**
+   * Creates an instance of Routing.
+   * @param {routingOptions} [options={}]
+   */
   constructor(options = {}) {
     this.options = { ...options };
     this.routes = new RoutesManager();

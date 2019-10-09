@@ -4,7 +4,10 @@
  * @namespace {Configuration} configaration
  */
 const config = {
-  /** options for initializing the Routing instance */
+  /**
+   * options for initializing the Routing instance
+   * @type {routingOptions}
+   */
   routingOptions: {},
 
   /** use hashes instead of urls */

@@ -2,9 +2,7 @@ import { getUrl, buildPath } from './utils';
 import config from './config';
 
 /**
- * RequestContext represents current request state.
- * Used for manipulating the request
- * @class RequestContext
+ * Represents request state.
  * @prop {Object.<string, string>} args - holds route arguments
  * @prop {string} path - route path
  * @prop {URL} url - route URL instance
@@ -12,6 +10,11 @@ import config from './config';
  * @prop {object} options - initialization options
  */
 class RequestContext {
+  /**
+   *Creates an instance of RequestContext.
+   * @param {(string|URL)} url
+   * @param {*} options
+   */
   constructor(url, options) {
     this.options = options;
     this.url = this._getUrl(url);

@@ -1,12 +1,14 @@
 /**
- * holds response state.
- *
+ * Represents response state.
  * @prop {*} error - if not falsy will be passed to errorHandler
  * @prop {RequestContext} request - processing request's requestContext instance.
  * @prop {*} locals - the legal way to pass data between middlewares
- * @class ResponseContext
  */
 class ResponseContext {
+  /**
+   * Creates an instance of ResponseContext.
+   * @param {RequestContext} req
+   */
   constructor(req) {
     this.error = null;
     this.request = req;
