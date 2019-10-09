@@ -129,10 +129,16 @@ class RouteHandler {
    */
   extractRouteArguments(req) {
     let params = this.pattern.exec(req.path).slice(1);
-    let params2 = this.pattern.exec(this.path).slice(1);
-    let args = params2.reduce((memo, param, index) => {
-      if (param == null) return memo;
-      memo[param.substring(1)] = params[index];
+    params.pop();
+    let matches = this.path.match(/:\w+/g) || [];
+    let args = matches.reduce((memo, paramName, index) => {
+      if (index >= params.length) {
+        return memo;
+      }
+      paramName = paramName.substring(1);
+
+      if (paramName == null) return memo;
+      index < params.length && (memo[paramName] = params[index]);
       return memo;
     }, {});
     return args;

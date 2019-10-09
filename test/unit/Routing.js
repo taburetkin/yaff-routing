@@ -4,6 +4,15 @@ const DefaultRouting = config.Routing;
 const DefaultRouteHandler = config.RouteHandler;
 const DefaultResponseContext = config.ResponseContext;
 const DefaultRequestContext = config.RequestContext;
+const hndl = cb => {
+  return (r, s, n) => {
+    let res = cb && cb(r);
+    if (res === false) {
+      return;
+    }
+    n();
+  };
+};
 const handler1 = (req, res, next) => next && next();
 const handler2 = (req, res, next) => next && next();
 
@@ -328,7 +337,7 @@ describe('Routing', function() {
       instance.navigate('foo/bar');
       expect(spy).to.be.calledOnce.and.calledWith('notfound');
     });
-    it("should call routeHandler's processRequest if routeHandler exist", function() {
+    it("should call routeHandler's processRequest with passed globalMiddlewares if routeHandler exist", function() {
       let spy = sinon.spy(DefaultRouteHandler.prototype, 'processRequest');
       instance.get('foo/bar', () => {});
       let glblmw = () => {};
@@ -336,6 +345,56 @@ describe('Routing', function() {
       instance.navigate('foo/bar');
       expect(spy).to.be.calledOnce;
       expect(spy.getCall(0).args[2].globalMiddlewares).to.be.eql([glblmw]);
+    });
+    it('should delegate to correct routeHandler with strictcly defined routes', function() {
+      let res = '';
+      let mw1 = hndl(() => (res = 'foo'));
+      let mw2 = hndl(() => (res = 'foo/bar'));
+      instance.get('foo', mw1);
+      instance.get('foo/bar', mw2);
+
+      instance.navigate('foo/bar');
+      expect(res).to.be.equal('foo/bar');
+
+      instance.navigate('foo');
+      expect(res).to.be.equal('foo');
+
+      instance.remove('foo');
+      instance.remove('foo/bar');
+      instance.get('foo', mw1);
+      instance.get('foo/bar', mw2);
+
+      instance.navigate('foo');
+      expect(res).to.be.equal('foo');
+
+      instance.navigate('foo/bar');
+      expect(res).to.be.equal('foo/bar');
+    });
+    it('should delegate to correct routeHandler', function() {
+      let res = '';
+      let mw1 = hndl(r => (res = `${r.args.action}:${r.args.id}`));
+      let mw2 = hndl(() => (res = `some`));
+
+      instance.get('foo/:action/some', mw2);
+      instance.get('foo/:action/:id', mw1);
+      instance.get('foo/:action', mw1);
+
+      instance.navigate('foo/bar');
+      expect(res).to.be.equal('bar:undefined');
+      res = 0;
+
+      instance.navigate('foo');
+      expect(res).to.be.equal(0);
+
+      instance.navigate('foo/bar/some');
+      expect(res).to.be.equal('some');
+
+      instance.navigate('foo/bar/123');
+      expect(res).to.be.equal('bar:123');
+      res = 0;
+
+      instance.navigate('foo/bar/123/123');
+      expect(res).to.be.equal(0);
     });
   });
 });
