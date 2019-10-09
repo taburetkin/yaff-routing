@@ -1,7 +1,7 @@
 /**
  * Routing configuration.
  * You can provide your own versions of internal classes and setup some behavior.
- * @namespace
+ * @namespace {Configuration} configaration
  */
 const config = {
   /** options for initializing the Routing instance */

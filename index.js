@@ -8,12 +8,13 @@ config.Routing = Routing;
 config.RouteHandler = RouteHandler;
 config.RequestContext = RequestContext;
 config.ResponseContext = ResponseContext;
+
 /**
- * This is the Main namespace. by Default its only the thing you should use working with fe-routing-js
- * @namespace
- *
+ * This is main module.
+ * By Default its only the thing you should use working with fe-routing-js
+ * @module routing
  */
-const routing = {
+export default {
   /**
    * Returns current routing instance. If it does not exist instance will be created.
    * @private
@@ -105,9 +106,7 @@ const routing = {
 
   /**
    * routing Configuration
-   * @see {@link config}
+   * @see {@link configuration}
    */
   config
 };
-
-export default routing;

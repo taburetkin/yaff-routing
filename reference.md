@@ -1,3 +1,12 @@
+## Modules
+
+<dl>
+<dt><a href="#module_routing">routing</a></dt>
+<dd><p>This is main module.
+By Default its only the thing you should use working with fe-routing-js</p>
+</dd>
+</dl>
+
 ## Classes
 
 <dl>
@@ -14,10 +23,7 @@
 ## Objects
 
 <dl>
-<dt><a href="#routing">routing</a> : <code>object</code></dt>
-<dd><p>This is the Main namespace. by Default its only the thing you should use working with fe-routing-js</p>
-</dd>
-<dt><a href="#config">config</a> : <code>object</code></dt>
+<dt><a href="#configaration">configaration</a> : <code>object</code></dt>
 <dd><p>Routing configuration.
 You can provide your own versions of internal classes and setup some behavior.</p>
 </dd>
@@ -30,6 +36,85 @@ You can provide your own versions of internal classes and setup some behavior.</
 <dd></dd>
 </dl>
 
+<a name="module_routing"></a>
+
+## routing
+This is main module.By Default its only the thing you should use working with fe-routing-js
+
+
+* [routing](#module_routing)
+    * [.config](#module_routing.config)
+    * [.createRouting()](#module_routing.createRouting) ⇒ [<code>Routing</code>](#Routing)
+    * [.get()](#module_routing.get) ⇒ [<code>Routing</code>](#Routing)
+    * [.use()](#module_routing.use) ⇒ [<code>Routing</code>](#Routing)
+    * [.isStarted()](#module_routing.isStarted) ⇒ <code>boolean</code>
+    * [.start()](#module_routing.start) ⇒ [<code>Routing</code>](#Routing)
+    * [.stop()](#module_routing.stop) ⇒ [<code>Routing</code>](#Routing)
+    * [.remove()](#module_routing.remove) ⇒ [<code>RouteHandler</code>](#RouteHandler) \| <code>void</code>
+    * [.navigate()](#module_routing.navigate)
+
+<a name="module_routing.config"></a>
+
+### routing.config
+routing Configuration
+
+**Kind**: static property of [<code>routing</code>](#module_routing)  
+**See**: [configuration](configuration)  
+<a name="module_routing.createRouting"></a>
+
+### routing.createRouting() ⇒ [<code>Routing</code>](#Routing)
+Creates instance of Routing with config.routingOptions.
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
+**Returns**: [<code>Routing</code>](#Routing) - Routing instance  
+<a name="module_routing.get"></a>
+
+### routing.get() ⇒ [<code>Routing</code>](#Routing)
+Proxy method to Routing instance's `get`
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
+**See**: [Routing.get](Routing.get)  
+<a name="module_routing.use"></a>
+
+### routing.use() ⇒ [<code>Routing</code>](#Routing)
+Proxy method to Routing instance's `use`
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
+**See**: [Routing.use](Routing.use)  
+<a name="module_routing.isStarted"></a>
+
+### routing.isStarted() ⇒ <code>boolean</code>
+Returns true if routing started
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
+<a name="module_routing.start"></a>
+
+### routing.start() ⇒ [<code>Routing</code>](#Routing)
+Starts routing
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
+**See**: [Routing.start](Routing.start)  
+<a name="module_routing.stop"></a>
+
+### routing.stop() ⇒ [<code>Routing</code>](#Routing)
+Stops routing
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
+**See**: [Routing.stop](Routing.stop)  
+<a name="module_routing.remove"></a>
+
+### routing.remove() ⇒ [<code>RouteHandler</code>](#RouteHandler) \| <code>void</code>
+Removes middleware or middleware's handler.Proxy method for Routing instance's `remove`.
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
+**See**: [Routing.stop](Routing.stop)  
+<a name="module_routing.navigate"></a>
+
+### routing.navigate()
+Initiates the request.Proxy method for Routing instance's `navigate`.
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
+**See**: [Routing.navigate](Routing.navigate)  
 <a name="Routing"></a>
 
 ## Routing
@@ -466,137 +551,12 @@ Sets 'notfound' error, shorthand for setError('notfound')
 Sets 'notallowed' error, shorthand for setError('notallowed')
 
 **Kind**: instance method of [<code>ResponseContext</code>](#ResponseContext)  
-<a name="routing"></a>
+<a name="configaration"></a>
 
-## routing : <code>object</code>
-This is the Main namespace. by Default its only the thing you should use working with fe-routing-js
-
-**Kind**: global namespace  
-
-* [routing](#routing) : <code>object</code>
-    * [.config](#routing.config)
-    * [.createRouting()](#routing.createRouting) ⇒ [<code>Routing</code>](#Routing)
-    * [.get()](#routing.get) ⇒ [<code>Routing</code>](#Routing)
-    * [.use()](#routing.use) ⇒ [<code>Routing</code>](#Routing)
-    * [.isStarted()](#routing.isStarted) ⇒ <code>boolean</code>
-    * [.start()](#routing.start) ⇒ [<code>Routing</code>](#Routing)
-    * [.stop()](#routing.stop) ⇒ [<code>Routing</code>](#Routing)
-    * [.remove()](#routing.remove) ⇒ [<code>RouteHandler</code>](#RouteHandler) \| <code>void</code>
-    * [.navigate()](#routing.navigate)
-
-<a name="routing.config"></a>
-
-### routing.config
-routing Configuration
-
-**Kind**: static property of [<code>routing</code>](#routing)  
-**See**: [config](#config)  
-<a name="routing.createRouting"></a>
-
-### routing.createRouting() ⇒ [<code>Routing</code>](#Routing)
-Creates instance of Routing with config.routingOptions.
-
-**Kind**: static method of [<code>routing</code>](#routing)  
-**Returns**: [<code>Routing</code>](#Routing) - Routing instance  
-<a name="routing.get"></a>
-
-### routing.get() ⇒ [<code>Routing</code>](#Routing)
-Proxy method to Routing instance's `get`
-
-**Kind**: static method of [<code>routing</code>](#routing)  
-**See**: [Routing.get](Routing.get)  
-<a name="routing.use"></a>
-
-### routing.use() ⇒ [<code>Routing</code>](#Routing)
-Proxy method to Routing instance's `use`
-
-**Kind**: static method of [<code>routing</code>](#routing)  
-**See**: [Routing.use](Routing.use)  
-<a name="routing.isStarted"></a>
-
-### routing.isStarted() ⇒ <code>boolean</code>
-Returns true if routing started
-
-**Kind**: static method of [<code>routing</code>](#routing)  
-<a name="routing.start"></a>
-
-### routing.start() ⇒ [<code>Routing</code>](#Routing)
-Starts routing
-
-**Kind**: static method of [<code>routing</code>](#routing)  
-**See**: [Routing.start](Routing.start)  
-<a name="routing.stop"></a>
-
-### routing.stop() ⇒ [<code>Routing</code>](#Routing)
-Stops routing
-
-**Kind**: static method of [<code>routing</code>](#routing)  
-**See**: [Routing.stop](Routing.stop)  
-<a name="routing.remove"></a>
-
-### routing.remove() ⇒ [<code>RouteHandler</code>](#RouteHandler) \| <code>void</code>
-Removes middleware or middleware's handler.Proxy method for Routing instance's `remove`.
-
-**Kind**: static method of [<code>routing</code>](#routing)  
-**See**: [Routing.stop](Routing.stop)  
-<a name="routing.navigate"></a>
-
-### routing.navigate()
-Initiates the request.Proxy method for Routing instance's `navigate`.
-
-**Kind**: static method of [<code>routing</code>](#routing)  
-**See**: [Routing.navigate](Routing.navigate)  
-<a name="config"></a>
-
-## config : <code>object</code>
+## configaration : <code>object</code>
 Routing configuration.You can provide your own versions of internal classes and setup some behavior.
 
 **Kind**: global namespace  
-
-* [config](#config) : <code>object</code>
-    * [.routingOptions](#config.routingOptions)
-    * [.useHashes](#config.useHashes)
-    * [.Routing](#config.Routing) : [<code>Routing</code>](#Routing)
-    * [.RouteHandler](#config.RouteHandler) : [<code>RouteHandler</code>](#RouteHandler)
-    * [.RequestContext](#config.RequestContext) : [<code>RequestContext</code>](#RequestContext)
-    * [.ResponseContext](#config.ResponseContext) : [<code>ResponseContext</code>](#ResponseContext)
-
-<a name="config.routingOptions"></a>
-
-### config.routingOptions
-options for initializing the Routing instance
-
-**Kind**: static property of [<code>config</code>](#config)  
-<a name="config.useHashes"></a>
-
-### config.useHashes
-use hashes instead of urls
-
-**Kind**: static property of [<code>config</code>](#config)  
-<a name="config.Routing"></a>
-
-### config.Routing : [<code>Routing</code>](#Routing)
-- Routing definition will be used internally by routing. Replace it with your extended version if you need
-
-**Kind**: static property of [<code>config</code>](#config)  
-<a name="config.RouteHandler"></a>
-
-### config.RouteHandler : [<code>RouteHandler</code>](#RouteHandler)
-- RouteHandler definition will be used internally by routing. Replace it with your extended version if you need
-
-**Kind**: static property of [<code>config</code>](#config)  
-<a name="config.RequestContext"></a>
-
-### config.RequestContext : [<code>RequestContext</code>](#RequestContext)
-- RequestContext definition will be used internally by routing. Replace it with your extended version if you need
-
-**Kind**: static property of [<code>config</code>](#config)  
-<a name="config.ResponseContext"></a>
-
-### config.ResponseContext : [<code>ResponseContext</code>](#ResponseContext)
-- RequestContext definition will be used internally by routing. Replace it with your extended version if you need
-
-**Kind**: static property of [<code>config</code>](#config)  
 <a name="startOptions"></a>
 
 ## startOptions : <code>Object</code>
