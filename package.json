@@ -7,10 +7,10 @@
 	"author": "dimtabu <dima.taburetkin@gmail.com>",
 	"license": "MIT",
 	"scripts": {
-    "docs": "node tooling/jsdocs",
+		"docs": "node tooling/jsdocs",
 		"build": "yarn build-es5 && yarn build-esm",
-    "build-es5": "rollup --config tooling/rollup.config.es5.js",
-    "build-esm": "rollup --config tooling/rollup.config.esm.js",
+		"build-es5": "rollup --config tooling/rollup.config.es5.js",
+		"build-esm": "rollup --config tooling/rollup.config.esm.js",
 		"test": "mocha --config ./test/.mocharc.raw.json",
 		"test-w": "mocha -w --config ./test/.mocharc.raw.json",
 		"test-es5": "yarn build-es5 && mocha --config ./test/.mocharc.es5.json",
@@ -46,6 +46,7 @@
 		"rollup": "^1.23.0",
 		"rollup-plugin-babel": "^4.3.3",
 		"rollup-plugin-babel-minify": "^9.1.0",
+		"rollup-plugin-node-resolve": "^5.2.0",
 		"sinon": "^7.4.2",
 		"sinon-chai": "^3.3.0"
 	},

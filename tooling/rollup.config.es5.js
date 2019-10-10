@@ -1,4 +1,5 @@
 const babel = require('rollup-plugin-babel');
+const resolve = require('rollup-plugin-node-resolve');
 
 module.exports = {
   input: './index.js',
@@ -8,8 +9,10 @@ module.exports = {
     name: 'routing'
   },
   plugins: [
+    //resolve(),
     babel({
       babelrc: false,
+      exclude: [/\/core-js\//],
       presets: [
         [
           '@babel/env',

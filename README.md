@@ -177,18 +177,24 @@ routing.use((req, res, next) => {
 
   // setting custom handler
   res.setError('myOwnHandler');
+
+  // setting undefined error, it will be handled by `default` handler
+  res.setError('something-not-defined');
 });
 
 routing.start({
   errorHandlers: {
     default(error, req, res) {
-      //all javascript errors goes here
+      //all undefined errors goes here
+    },
+    exception(error) {
+      //all Error's goes here
     },
     notfound() {
-      // show notfound
+      // show notfound page
     },
     notallowed() {
-      // show notallowed
+      // show notallowed page
     },
     myOwnHandler() {
       // some custom error handler
