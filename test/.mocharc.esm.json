@@ -3,7 +3,7 @@
 	"file": "./test/setup.esm.js",
 	"recursive": true,
 	"reporter": "dot",
-	"require": ["module-alias/register"],
+	"require": ["module-alias/register", "@babel/register"],
 	"spec": "./test/unit/",
 	"ui": "bdd"
 }

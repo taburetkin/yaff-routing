@@ -1,7 +1,6 @@
 import config from './config';
 import { getUrl } from './utils';
 import RoutesManager from './RoutesManager';
-let stateCounter = 0;
 
 /**
  * @typedef {Object} startOptions
@@ -70,18 +69,29 @@ class Routing {
 
   /**
    * Sets onpopstate handler to reflect on history go forward/back.
-   * @param {object} opts
    * @private
    * @memberof Routing
    */
-  _setOnPopstate(opts) {
-    window.onpopstate = event => {
-      let navOpts = { ...opts };
-      navOpts.state = event.state;
-      this.navigate(navOpts);
+  _setOnPopstate() {
+    this._onPopstate = event => {
+      let options = event.state.navigateOptions || { trigger: true };
+      options.pushState = false;
+      return this.navigate(options);
     };
+    window.addEventListener('popstate', this._onPopstate);
   }
 
+  /**
+   * removes onpopstate handler
+   * @private
+   * @memberof Routing
+   */
+  _removeOnPopstate() {
+    if (typeof this._onPopstate == 'function') {
+      window.removeEventListener('popstate', this._onPopstate);
+      delete this._onPopstate;
+    }
+  }
   /**
    * Stops routing
    * @returns {Routing}
@@ -89,7 +99,7 @@ class Routing {
    */
   stop() {
     config.isStarted = false;
-    window.onpopstate = null;
+    this._removeOnPopstate();
     return this;
   }
 
@@ -258,9 +268,14 @@ class Routing {
 
     let routeHandler = this.findRouteHandler(req);
     if (routeHandler) {
-      await routeHandler.processRequest(req, res, {
-        globalMiddlewares: [...this._globalMiddlewares]
-      });
+      try {
+        await routeHandler.processRequest(req, res, {
+          globalMiddlewares: [...this._globalMiddlewares]
+        });
+      } catch (exc) {
+        res.setError(exc);
+      }
+
       if (res.error) {
         this.handleError(res.error, req, res);
       }
@@ -312,9 +327,7 @@ class Routing {
     let handler = this._errorHandlers[errorKey];
     if (typeof handler === 'function') {
       handler.call(this, error, req, res);
-      return;
-    }
-    if (errorKey !== 'default' && defaultHandler) {
+    } else if (errorKey !== 'default' && typeof defaultHandler == 'function') {
       defaultHandler.call(this, error, req, res);
     }
   }
@@ -359,7 +372,7 @@ class Routing {
    * If there is no such routeHandler then `notfound` errorHandler will be invoked.
    * @param {*} url
    * @param {*} [options={}]
-   * @returns {boolean} Returns `false` if navigate is used against current url.
+   * @returns {Promise}
    * @memberof Routing
    */
   navigate(url, options = {}) {
@@ -369,18 +382,24 @@ class Routing {
       url = null;
     }
 
-    if (this.isCurrentUrl(url)) {
-      return false;
-    }
+    let iscurrent = this.isCurrentUrl(url);
 
-    if (options.trigger !== false) {
-      this._processRequest(url, options);
-    }
+    // options.trigger:
+    //    true - request will be processed even url is a current url
+    //    false - request will not be processed
+    //    undefined - request will be process only if url is not current url
+    let shouldTrigger =
+      (options.trigger !== false && !iscurrent) || options.trigger === true;
+    let result =
+      (shouldTrigger && this._processRequest(url, options)) ||
+      Promise.resolve(false);
+
     this.setCurrentUrl(url);
-    if (options.pushState !== false) {
+    //pushing state only if this is not forbidden and processed url is not current
+    if (options.pushState !== false && !iscurrent) {
       this.browserPushState(url, options);
     }
-    return true;
+    return result;
   }
 
   /**
@@ -411,9 +430,9 @@ class Routing {
    * @param {(string|URL)} url
    * @memberof Routing
    */
-  browserPushState(url) {
+  browserPushState(url, options) {
     url = this._getUrl(url);
-    let state = this.getCurrentState();
+    let state = this.getCurrentState(options);
     history.pushState(state, document.title, url.toString());
   }
 
@@ -424,10 +443,10 @@ class Routing {
    * @returns {object}
    * @memberof Routing
    */
-  getCurrentState() {
-    return {
-      counter: ++stateCounter
-    };
+  getCurrentState(opts) {
+    let navigateOptions = { ...opts };
+    navigateOptions.trigger = opts.trigger !== false;
+    return { navigateOptions };
   }
   //#endregion
 

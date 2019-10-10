@@ -29,7 +29,7 @@ class RouteHandler {
    * @param {function[]} middlewares
    * @memberof RouteHandler
    */
-  addMiddlewares(middlewares) {
+  addMiddlewares(middlewares = []) {
     for (let middleware of middlewares) {
       this.addMiddleware(middleware);
     }

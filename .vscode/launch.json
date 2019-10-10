@@ -20,7 +20,7 @@
 				"999999",
 				"--colors",
 				"--config",
-				"${workspaceFolder}/test/.mocharc.json"
+				"${workspaceFolder}/test/.mocharc.raw.json"
 			],
 			"console": "integratedTerminal",
 			"internalConsoleOptions": "neverOpen",
@@ -35,8 +35,8 @@
 				"--timeout",
 				"999999",
 				"--colors",
-				"--require",
-				"@babel\/register",
+				"--config",
+				"${workspaceFolder}/test/.mocharc.raw.json",
 				"${file}"
 			],
 			"console": "integratedTerminal",

@@ -12,7 +12,12 @@ export function getUrl(url, useHashes) {
   } else if (url instanceof URL) {
     return url;
   } else if (typeof url == 'string' && /^https*:\/\//.test(url)) {
-    return new URL(url);
+    // should throw if origin mismatched
+    url = new URL(url);
+    if (url.origin != document.location.origin) {
+      throw new Error('wrong url origin');
+    }
+    return url;
   }
 
   url = leadingSlash(url);

@@ -10,7 +10,7 @@ const fs = require('fs');
       'RequestContext.js',
       'ResponseContext.js'
     ],
-    configure: './jsdoc.config.js'
+    configure: './tooling/jsdoc.config.js'
   });
   fs.writeFileSync('reference.md', content);
 })();

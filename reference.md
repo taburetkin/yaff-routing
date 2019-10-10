@@ -151,7 +151,7 @@ Manipulates existing routeHandlers, global middlewares and processes the request
     * [.testRouteHandler(req, routeHandler)](#Routing+testRouteHandler) ⇒ <code>boolean</code>
     * [.handleError(error, req, res)](#Routing+handleError)
     * [.getErrorHandlerName(error)](#Routing+getErrorHandlerName) ⇒ <code>string</code>
-    * [.navigate(url, [options])](#Routing+navigate) ⇒ <code>boolean</code>
+    * [.navigate(url, [options])](#Routing+navigate) ⇒ <code>Promise</code>
     * [.isCurrentUrl(url)](#Routing+isCurrentUrl) ⇒ <code>boolean</code>
     * [.setCurrentUrl(url)](#Routing+setCurrentUrl)
     * [.browserPushState(url)](#Routing+browserPushState)
@@ -319,11 +319,10 @@ Converts response error to errorHandler name.If error instance of Error then `e
 
 <a name="Routing+navigate"></a>
 
-### routing.navigate(url, [options]) ⇒ <code>boolean</code>
+### routing.navigate(url, [options]) ⇒ <code>Promise</code>
 Tries to find registered routeHandler by path and execute its middlewares.If there is no such routeHandler then `notfound` errorHandler will be invoked.
 
 **Kind**: instance method of [<code>Routing</code>](#Routing)  
-**Returns**: <code>boolean</code> - Returns `false` if navigate is used against current url.  
 
 | Param | Type | Default |
 | --- | --- | --- |
