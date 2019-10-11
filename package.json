@@ -1,6 +1,6 @@
 {
 	"name": "fe-routing-js",
-	"version": "0.0.12",
+	"version": "0.1.0",
 	"description": "javascript front-end routing pack",
 	"main": "index.js",
 	"module": "index.js",
@@ -46,6 +46,7 @@
 		"rollup": "^1.23.0",
 		"rollup-plugin-babel": "^4.3.3",
 		"rollup-plugin-babel-minify": "^9.1.0",
+		"rollup-plugin-commonjs": "^10.1.0",
 		"rollup-plugin-node-resolve": "^5.2.0",
 		"sinon": "^7.4.2",
 		"sinon-chai": "^3.3.0"
