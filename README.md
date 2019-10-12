@@ -4,7 +4,7 @@ Simple frontend routing with pretty similar to nodejs express API.
 
 ## Reference
 
-For detailed reference [go here](https://github.com/taburetkin/@yaff/routing/blob/master/reference.md)
+For detailed reference [go here](https://github.com/taburetkin/yaff-routing/blob/master/reference.md)
 
 ## How to use
 
@@ -268,4 +268,4 @@ routing.use('somepage', routeHandler3);
 // handler1 -> handler3 -> routeHandler3 -> routeHandler1 -> routeHandler2
 ```
 
-[Take a look on detailed reference](https://github.com/taburetkin/@yaff/routing/blob/master/reference.md)
+[Take a look on detailed reference](https://github.com/taburetkin/yaff-routing/blob/master/reference.md)
