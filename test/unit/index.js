@@ -1,5 +1,3 @@
-import routing from '../..';
-
 const config = routing.config;
 const DefaultRouting = config.Routing;
 const handler1 = (req, res, next) => next && next();

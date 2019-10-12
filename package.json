@@ -1,6 +1,6 @@
 {
-	"name": "fe-routing-js",
-	"version": "0.1.0",
+	"name": "@yaff/routing",
+	"version": "0.2.0",
 	"description": "javascript front-end routing pack",
 	"main": "index.js",
 	"module": "index.js",
@@ -49,10 +49,10 @@
 		"rollup-plugin-commonjs": "^10.1.0",
 		"rollup-plugin-node-resolve": "^5.2.0",
 		"sinon": "^7.4.2",
-		"sinon-chai": "^3.3.0"
-	},
-	"dependencies": {
+		"sinon-chai": "^3.3.0",
 		"core-js": "^3.2.1",
 		"regenerator-runtime": "^0.13.3"
+	},
+	"dependencies": {
 	}
 }

@@ -1,4 +1,4 @@
-import routing from '../..';
+const config = routing.config;
 
 describe('RouteHandler', function() {
   describe('middlewares', function() {
@@ -63,6 +63,9 @@ describe('RouteHandler', function() {
         handler.removeMiddlewares();
         expect(handler.middlewares.length).to.be.equal(0);
       });
+      it('should throw if called with wrong argument', function() {
+        expect(handler.removeMiddlewares.bind(handler, 'foo')).to.throw();
+      });
       it('should remove all founded middlewares', function() {
         handler.removeMiddlewares([mw1, mw2]);
         expect(handler.middlewares.length).to.be.equal(0);
@@ -120,6 +123,25 @@ describe('RouteHandler', function() {
       routing.use((r, s, n) => (h.push('global'), n()));
       routing.navigate('test');
       expect(h).to.be.eql(['global', 'one', 'two']);
+    });
+    it('should be able to process if there is no options provided', function() {
+      let handler = routing.instance.add('test/foo', [() => {}]);
+      expect(handler).to.be.instanceOf(config.RouteHandler);
+      let req = routing.instance.createRequestContext('test/foo');
+      let res = routing.instance.createResponseContext(req);
+      expect(handler.processRequest.bind(handler, req, res)).to.not.throw();
+    });
+  });
+  describe('extractRouteArguments', function() {
+    let inst;
+    const getReq = arg => inst.createRequestContext(arg || 'notfound/foo/bar');
+    beforeEach(function() {
+      inst = new config.Routing();
+    });
+    it('should not throw if there is no arguments to extract', function() {
+      let handler = new config.RouteHandler('found/foo/bar');
+      let req = getReq('notfound/foo/bar');
+      expect(handler.extractRouteArguments.bind(handler, req)).to.not.throw();
     });
   });
 });

@@ -1,17 +1,23 @@
-# fe-routing-js (under testing)
+# @yaff/routing (pre release)
 
 Simple frontend routing with pretty similar to nodejs express API.
 
 ## Reference
 
-For detailed reference [go here](https://github.com/taburetkin/fe-routing-js/blob/master/reference.md)
+For detailed reference [go here](https://github.com/taburetkin/@yaff/routing/blob/master/reference.md)
 
 ## How to use
+
+This package is shipped as pure es6 module and it should be transpiled and minified by your own during bundle time of your application.  
+Btw, there is a special packed `es5 umd` and `esm` versions in the `lib` folder for stand alone include.
+
+> **NOTE!**  
+> This package internally uses `URL`, `addEventListener`, window's `popstate` event and `history.pushState`, so if you are going to use it with **IE11** you have to provide polifylls for that. I've tested it with `core-js` and `jquery` and it seems that its enough for using in old browsers.
 
 ### Simple use case:
 
 ```javascript
-import { routing } from 'fe-routing-js';
+import { routing } from '@yaff/routing';
 
 //define middleware for root page http://localhost
 routing.get('', () => {
@@ -50,7 +56,7 @@ routing.start();
 As in nodejs express routing you can setup multiple middlewares for each route, they will be executed in order.
 
 ```javascript
-import { routing } from 'fe-routing-js';
+import { routing } from '@yaff/routing';
 
 routing.get(
   'some/deep/route',
@@ -74,7 +80,7 @@ routing.get(
 Next example illustrates one of possible ways of using middlewares chain:
 
 ```javascript
-import { routing } from 'fe-routing-js';
+import { routing } from '@yaff/routing';
 
 function validate(req, res, next) {
   let articleId = parseInt(req.args.id, 10);
@@ -140,7 +146,7 @@ const middleware = (req, res, next) => {
 Sometimes you have to define common middleware for all your routes
 
 ```javascript
-import { routing } from 'fe-routing-js';
+import { routing } from '@yaff/routing';
 
 //this middleware will be executed on each route
 function logger(req) {
@@ -262,4 +268,4 @@ routing.use('somepage', routeHandler3);
 // handler1 -> handler3 -> routeHandler3 -> routeHandler1 -> routeHandler2
 ```
 
-[Take a look on detailed reference](https://github.com/taburetkin/fe-routing-js/blob/master/reference.md)
+[Take a look on detailed reference](https://github.com/taburetkin/@yaff/routing/blob/master/reference.md)

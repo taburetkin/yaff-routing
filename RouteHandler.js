@@ -128,16 +128,11 @@ class RouteHandler {
    * @memberof RouteHandler
    */
   extractRouteArguments(req) {
-    let params = this.pattern.exec(req.path).slice(1);
+    let params = (this.pattern.exec(req.path) || []).slice(1);
     params.pop();
     let matches = this.path.match(/:\w+/g) || [];
     let args = matches.reduce((memo, paramName, index) => {
-      if (index >= params.length) {
-        return memo;
-      }
       paramName = paramName.substring(1);
-
-      if (paramName == null) return memo;
       index < params.length && (memo[paramName] = params[index]);
       return memo;
     }, {});
@@ -152,6 +147,7 @@ class RouteHandler {
    * @memberof RouteHandler
    */
   testRequest(req) {
+    //console.log(req.path, this.pattern, this.pattern.test(req.path));
     return this.pattern.test(req.path);
   }
 
@@ -173,11 +169,14 @@ class RouteHandler {
     let route = this.path
       .replace(o.escapeRegExp, '\\$&')
       .replace(o.optionalParam, '(?:$1)?')
-      .replace(o.namedParam, function(match, optional) {
+      .replace(o.namedParam, (match, optional) => {
         return optional ? match : '([^/?]+)';
       })
       .replace(o.splatParam, '([^?]*?)');
-    return new RegExp('^' + route + '(?:\\?([\\s\\S]*))?$');
+
+    let trailingSlash = '\\/*';
+    let patternString = `^${route}(?:${trailingSlash}[?#]([\\s\\S]*))?$`;
+    return new RegExp(patternString);
   }
   //#endregion
 }

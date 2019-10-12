@@ -1,5 +1,6 @@
 sandbox/
 node_modules/
+lib/index.html
 .coverage/
 .nyc_output/
 yarn.lock

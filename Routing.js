@@ -74,8 +74,13 @@ class Routing {
    */
   _setOnPopstate() {
     this._onPopstate = event => {
-      let options = event.state.navigateOptions || { trigger: true };
+      if (event == null || typeof event != 'object') {
+        event = {};
+      }
+      let state = event.state != null ? event.state : {};
+      let options = state.navigateOptions || { trigger: true };
       options.pushState = false;
+      options.state = state;
       return this.navigate(options);
     };
     window.addEventListener('popstate', this._onPopstate);
@@ -352,11 +357,25 @@ class Routing {
 
   /**
    * Sets errorHandlers hash. By default merge exist errorHandlers with given
-   * @param {boolean} shouldReplace Indicates should errorHandlers be replaced or merged
+   * @example
+   * //will removes all existing handlers and sets myNewDefaultErrorHandler as default
+   * routing.setErrorHandlers(true, { default: myNewDefaultErrorHandler });
+   * //will replace default handler with myNewDefaultErrorHandler
+   * routing.setErrorHandlers(false, { default: myNewDefaultErrorHandler });
+   * //will replace default handler with myNewDefaultErrorHandler, like in previous example
+   * routing.setErrorHandlers({ default: myNewDefaultErrorHandler });
+   *
+   * @param {boolean} shouldReplace Indicates should errorHandlers be replaced or merged, can be omited and in that case default value will be used
    * @param  {...Object.<string, function>} handlers Objects literals to merge or replace with
    * @private
    */
   setErrorHandlers(shouldReplace, ...handlers) {
+    if (typeof shouldReplace == 'object') {
+      let _handlers = handlers;
+      handlers = Array.isArray(shouldReplace) ? shouldReplace : [shouldReplace];
+      handlers.push(..._handlers);
+      shouldReplace = null;
+    }
     if (!shouldReplace) {
       handlers.unshift(this._errorHandlers);
     }

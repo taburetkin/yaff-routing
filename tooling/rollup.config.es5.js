@@ -1,27 +1,26 @@
 const babel = require('rollup-plugin-babel');
 const resolve = require('rollup-plugin-node-resolve');
-
+const commonjs = require('rollup-plugin-commonjs');
 module.exports = {
-  input: './index.js',
+  input: ['./index.js'],
   output: {
-    file: './lib/fe.routing.es5.umd.js',
+    file: './lib/yaff.routing.es5.umd.js',
     format: 'umd',
     name: 'routing'
   },
   plugins: [
-    //resolve(),
+    commonjs(),
+    resolve(),
     babel({
       babelrc: false,
-      exclude: [/\/core-js\//],
+      exclude: /node_modules/,
       presets: [
         [
-          '@babel/env',
+          '@babel/preset-env',
           {
-            modules: 'false',
-            targets: {
-              chrome: '58',
-              ie: '11'
-            },
+            modules: false,
+            spec: true,
+            forceAllTransforms: true,
             useBuiltIns: 'usage',
             corejs: 3
           }

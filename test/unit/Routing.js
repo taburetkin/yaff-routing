@@ -24,6 +24,7 @@ describe('Routing', function() {
     instance = new DefaultRouting();
     instance.get(route, handler1);
     config.isStarted = false;
+    global.history.states = [{ url: global.baseUrl.toString() }];
   });
 
   afterEach(function() {
@@ -360,6 +361,44 @@ describe('Routing', function() {
         expect(spyDefault).to.be.not.called;
         expect(defaultSpy).to.be.calledTwice;
       });
+      it('should be able accept only errorHandlers hash and use merge approach in this case', function() {
+        let defaultSpy = this.sinon.spy();
+        let nextSpy = this.sinon.spy();
+        instance.setErrorHandlers(
+          {
+            default: defaultSpy
+          },
+          {
+            error2: nextSpy
+          }
+        );
+        instance.handleError('error1');
+        instance.handleError('error2');
+        instance.handleError('default');
+        expect(defaultSpy).to.be.calledOnce;
+        expect(spyError1).to.be.calledOnce;
+        expect(spyError2).to.not.be.called;
+        expect(nextSpy).to.be.calledOnce;
+      });
+      it('should be able accept only errorHandlers array of hash and use merge approach in this case', function() {
+        let defaultSpy = this.sinon.spy();
+        let nextSpy = this.sinon.spy();
+        instance.setErrorHandlers([
+          {
+            default: defaultSpy
+          },
+          {
+            error2: nextSpy
+          }
+        ]);
+        instance.handleError('error1');
+        instance.handleError('error2');
+        instance.handleError('default');
+        expect(defaultSpy).to.be.calledOnce;
+        expect(spyError1).to.be.calledOnce;
+        expect(spyError2).to.not.be.called;
+        expect(nextSpy).to.be.calledOnce;
+      });
     });
     describe('handleError', function() {
       let OopsError;
@@ -475,6 +514,45 @@ describe('Routing', function() {
 
       instance.navigate('foo/bar/123/123');
       expect(res).to.be.equal(0);
+
+      instance.get('bar/:action-foo(-:id)', mw1);
+      instance.navigate('bar/bar-foo');
+      expect(res).to.be.equal('bar:undefined');
+      instance.navigate('bar/bar-foo-123');
+      expect(res).to.be.equal('bar:123');
+
+      instance.get('bar/:action-:id/(baraban)', mw1);
+      instance.navigate('bar/bar-foo/');
+      expect(res).to.be.equal('bar:foo');
+
+      instance.navigate('bar/barbar-foofofo/baraban');
+      expect(res).to.be.equal('barbar:foofofo');
+
+      instance.navigate('bar/piw-piw/caravan');
+      expect(res).to.be.equal('barbar:foofofo');
+    });
+
+    describe('trailingSlash', function() {
+      afterEach(function() {
+        config.trailingSlashSensitive = false;
+      });
+      it('should correctly handle # in the url if trailingSlashSensitive is false', async function() {
+        let mw1 = sinon.spy();
+        let mw2 = sinon.spy();
+
+        instance.get('', mw1);
+        instance.get('foo/bar', mw2);
+
+        await instance.navigate('http://localhost#/test');
+
+        await instance.navigate('foo/bar#/test');
+
+        await instance.navigate('http://localhost/#/test');
+
+        await instance.navigate('/foo/bar/#/test');
+        expect(mw1.callCount).to.be.equal(2);
+        expect(mw2.callCount).to.be.equal(2);
+      });
     });
   });
   describe('hash based navigate', function() {
@@ -538,7 +616,7 @@ describe('Routing', function() {
       let path = 'foo/bar/zoo';
       instance.get(path, () => {});
       instance.navigate(path);
-      expect(document.location.hash).to.be.equal('#/' + path);
+      expect(document.location.hash).to.be.equal('#' + path);
     });
   });
   describe('popstate', function() {
@@ -568,6 +646,17 @@ describe('Routing', function() {
 
       expect(nav.callCount).to.be.equal(5);
       expect(mw3).to.be.calledTwice;
+    });
+    it('should be able handle wrong popstate', async function() {
+      await instance.navigate('route1');
+      expect(history.popState.bind(history)).to.not.throw();
+      await instance.navigate('route1');
+      await instance.navigate('route1');
+      expect(
+        history.popState.bind(history, { wrongArgs: true })
+      ).to.not.throw();
+
+      expect(window.onpopstate).to.not.throw();
     });
   });
 });

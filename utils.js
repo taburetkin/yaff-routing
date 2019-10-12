@@ -1,3 +1,5 @@
+import config from './config';
+
 /**
  * Converts given argument to URL instance
  *
@@ -20,22 +22,11 @@ export function getUrl(url, useHashes) {
     return url;
   }
 
-  url = leadingSlash(url);
-
   if (useHashes) {
     url = document.location.pathname + document.location.search + '#' + url;
   }
 
   return new URL(url, document.location.origin);
-}
-
-/** converts given argument to string and append leading slash to it */
-function leadingSlash(url) {
-  url = url.toString();
-  if (!url.startsWith('/')) {
-    url = '/' + url;
-  }
-  return url;
 }
 
 /**
@@ -50,8 +41,46 @@ export function buildPath(url, useHashes) {
   url = getUrl(url, useHashes);
   if (useHashes) {
     let hash = url.hash.substring(1);
-    return hash;
+    let hashUrl = getUrl(hash, false);
+    let path = hashUrl.pathname;
+    return path;
   } else {
     return url.pathname + url.search + url.hash;
   }
+}
+
+/**
+ * Helper to create application urls
+ * @example
+ * `<a href="${url('foo/bar')}"></a>`
+ * if config.useHashes is `true` then will produce "/#/foo/bar" url
+ * if not then will produce "/foo/bar" url
+ * @export
+ * @param {string[]} chunks
+ * @returns {string}
+ */
+export function url(...chunks) {
+  if (!chunks || chunks.length == 0) {
+    chunks = [''];
+  }
+
+  chunks = chunks.map(chunk => {
+    if (chunk == '' || chunk == null) {
+      return '';
+    }
+    if (chunk[0] !== '/') {
+      chunk = '/' + chunk;
+    }
+    return chunk;
+  });
+
+  if (chunks[0][0] !== '/') {
+    chunks[0] = '/' + chunks[0];
+  }
+
+  if (config.useHashes) {
+    chunks[0] = '/#' + chunks[0];
+  }
+
+  return chunks.join('');
 }

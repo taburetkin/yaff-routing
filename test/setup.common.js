@@ -12,6 +12,7 @@ global.expect = global.chai.expect;
 global.document = {
   location: new URL('', 'http://localhost')
 };
+global.baseUrl = new URL('', 'http://localhost');
 global.window = {
   addEventListener(type, cb) {
     this['on' + type] = cb;
@@ -29,7 +30,12 @@ global.history = {
   popState() {
     this.states.shift();
     let moveTo = this.states[0];
-    global.document.location.href = moveTo.url;
+    global.document.location.href = moveTo
+      ? moveTo.url
+      : document.location.origin;
+    if (arguments.length != 0) {
+      moveTo = null;
+    }
     return (
       moveTo && global.window.onpopstate && global.window.onpopstate(moveTo)
     );

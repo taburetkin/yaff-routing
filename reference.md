@@ -29,7 +29,7 @@ then all registered middlewares beeing invoked.</p>
 ## Objects
 
 <dl>
-<dt><a href="#configaration">configaration</a> : <code>object</code></dt>
+<dt><a href="#configuration">configuration</a> : <code>object</code></dt>
 <dd><p>Routing configuration.
 You can provide your own versions of internal classes and setup some behavior.</p>
 </dd>
@@ -67,7 +67,7 @@ This is main module.By Default its only the thing you should use working with f
 routing Configuration
 
 **Kind**: static property of [<code>routing</code>](#module_routing)  
-**See**: [configuration](configuration)  
+**See**: [configuration](#configuration)  
 <a name="module_routing.createRouting"></a>
 
 ### routing.createRouting() ⇒ [<code>Routing</code>](#Routing)
@@ -587,9 +587,9 @@ Sets 'notfound' error, shorthand for setError('notfound')
 Sets 'notallowed' error, shorthand for setError('notallowed')
 
 **Kind**: instance method of [<code>ResponseContext</code>](#ResponseContext)  
-<a name="configaration"></a>
+<a name="configuration"></a>
 
-## configaration : <code>object</code>
+## configuration : <code>object</code>
 Routing configuration.You can provide your own versions of internal classes and setup some behavior.
 
 **Kind**: global namespace  
