@@ -10,7 +10,7 @@ By Default its only the thing you should use working with fe-routing-js</p>
 ## Classes
 
 <dl>
-<dt><a href="#Routing">Routing</a></dt>
+<dt><a href="#Router">Router</a></dt>
 <dd><p>Manipulates existing routeHandlers, global middlewares and processes the requests</p>
 </dd>
 <dt><a href="#RouteHandler">RouteHandler</a></dt>
@@ -52,12 +52,12 @@ This is main module.By Default its only the thing you should use working with f
 
 * [routing](#module_routing)
     * [.config](#module_routing.config)
-    * [.createRouting()](#module_routing.createRouting) ⇒ [<code>Routing</code>](#Routing)
-    * [.get()](#module_routing.get) ⇒ [<code>Routing</code>](#Routing)
-    * [.use()](#module_routing.use) ⇒ [<code>Routing</code>](#Routing)
+    * [.createRouter()](#module_routing.createRouter) ⇒ [<code>Router</code>](#Router)
+    * [.get()](#module_routing.get) ⇒ [<code>Router</code>](#Router)
+    * [.use()](#module_routing.use) ⇒ [<code>Router</code>](#Router)
     * [.isStarted()](#module_routing.isStarted) ⇒ <code>boolean</code>
-    * [.start()](#module_routing.start) ⇒ [<code>Routing</code>](#Routing)
-    * [.stop()](#module_routing.stop) ⇒ [<code>Routing</code>](#Routing)
+    * [.start()](#module_routing.start) ⇒ [<code>Router</code>](#Router)
+    * [.stop()](#module_routing.stop) ⇒ [<code>Router</code>](#Router)
     * [.remove()](#module_routing.remove) ⇒ [<code>RouteHandler</code>](#RouteHandler) \| <code>void</code>
     * [.navigate()](#module_routing.navigate)
 
@@ -68,27 +68,27 @@ routing Configuration
 
 **Kind**: static property of [<code>routing</code>](#module_routing)  
 **See**: [configuration](#configuration)  
-<a name="module_routing.createRouting"></a>
+<a name="module_routing.createRouter"></a>
 
-### routing.createRouting() ⇒ [<code>Routing</code>](#Routing)
-Creates instance of Routing with config.routingOptions.
+### routing.createRouter() ⇒ [<code>Router</code>](#Router)
+Creates instance of Router with config.routingOptions.
 
 **Kind**: static method of [<code>routing</code>](#module_routing)  
-**Returns**: [<code>Routing</code>](#Routing) - Routing instance  
+**Returns**: [<code>Router</code>](#Router) - Router instance  
 <a name="module_routing.get"></a>
 
-### routing.get() ⇒ [<code>Routing</code>](#Routing)
-Proxy method to Routing instance's `get`
+### routing.get() ⇒ [<code>Router</code>](#Router)
+Proxy method to Router instance's `get`
 
 **Kind**: static method of [<code>routing</code>](#module_routing)  
-**See**: [Routing.get](Routing.get)  
+**See**: [Router.get](Router.get)  
 <a name="module_routing.use"></a>
 
-### routing.use() ⇒ [<code>Routing</code>](#Routing)
-Proxy method to Routing instance's `use`
+### routing.use() ⇒ [<code>Router</code>](#Router)
+Proxy method to Router instance's `use`
 
 **Kind**: static method of [<code>routing</code>](#module_routing)  
-**See**: [Routing.use](Routing.use)  
+**See**: [Router.use](Router.use)  
 <a name="module_routing.isStarted"></a>
 
 ### routing.isStarted() ⇒ <code>boolean</code>
@@ -97,35 +97,35 @@ Returns true if routing started
 **Kind**: static method of [<code>routing</code>](#module_routing)  
 <a name="module_routing.start"></a>
 
-### routing.start() ⇒ [<code>Routing</code>](#Routing)
+### routing.start() ⇒ [<code>Router</code>](#Router)
 Starts routing
 
 **Kind**: static method of [<code>routing</code>](#module_routing)  
-**See**: [Routing.start](Routing.start)  
+**See**: [Router.start](Router.start)  
 <a name="module_routing.stop"></a>
 
-### routing.stop() ⇒ [<code>Routing</code>](#Routing)
+### routing.stop() ⇒ [<code>Router</code>](#Router)
 Stops routing
 
 **Kind**: static method of [<code>routing</code>](#module_routing)  
-**See**: [Routing.stop](Routing.stop)  
+**See**: [Router.stop](Router.stop)  
 <a name="module_routing.remove"></a>
 
 ### routing.remove() ⇒ [<code>RouteHandler</code>](#RouteHandler) \| <code>void</code>
-Removes middleware or middleware's handler.Proxy method for Routing instance's `remove`.
+Removes middleware or middleware's handler.Proxy method for Router instance's `remove`.
 
 **Kind**: static method of [<code>routing</code>](#module_routing)  
-**See**: [Routing.stop](Routing.stop)  
+**See**: [Router.stop](Router.stop)  
 <a name="module_routing.navigate"></a>
 
 ### routing.navigate()
-Initiates the request.Proxy method for Routing instance's `navigate`.
+Initiates the request.Proxy method for Router instance's `navigate`.
 
 **Kind**: static method of [<code>routing</code>](#module_routing)  
-**See**: [Routing.navigate](Routing.navigate)  
-<a name="Routing"></a>
+**See**: [Router.navigate](Router.navigate)  
+<a name="Router"></a>
 
-## Routing
+## Router
 Manipulates existing routeHandlers, global middlewares and processes the requests
 
 **Kind**: global class  
@@ -136,92 +136,92 @@ Manipulates existing routeHandlers, global middlewares and processes the request
 | routes | <code>RoutesManager</code> | Holds all registered routeHandlers |
 
 
-* [Routing](#Routing)
-    * [new Routing([options])](#new_Routing_new)
-    * [.start(options)](#Routing+start) ⇒ [<code>Routing</code>](#Routing)
-    * [.stop()](#Routing+stop) ⇒ [<code>Routing</code>](#Routing)
-    * [.isStarted()](#Routing+isStarted) ⇒ <code>boolean</code>
-    * [.use(path, [middleware])](#Routing+use) ⇒ [<code>Routing</code>](#Routing)
-    * [.get(path, ...middlewares)](#Routing+get) ⇒ [<code>Routing</code>](#Routing)
-    * [.add(path, middlewares, unshift)](#Routing+add) ⇒ [<code>RouteHandler</code>](#RouteHandler)
-    * [.remove(path, middleware)](#Routing+remove) ⇒ <code>function</code> \| <code>void</code>
-    * [.createRequestContext(url, options)](#Routing+createRequestContext) ⇒
-    * [.createResponseContext(req)](#Routing+createResponseContext) ⇒
-    * [.findRouteHandler(req)](#Routing+findRouteHandler) ⇒
-    * [.testRouteHandler(req, routeHandler)](#Routing+testRouteHandler) ⇒ <code>boolean</code>
-    * [.handleError(error, req, res)](#Routing+handleError)
-    * [.getErrorHandlerName(error)](#Routing+getErrorHandlerName) ⇒ <code>string</code>
-    * [.navigate(url, [options])](#Routing+navigate) ⇒ <code>Promise</code>
-    * [.isCurrentUrl(url)](#Routing+isCurrentUrl) ⇒ <code>boolean</code>
-    * [.setCurrentUrl(url)](#Routing+setCurrentUrl)
-    * [.browserPushState(url)](#Routing+browserPushState)
-    * [.getCurrentState()](#Routing+getCurrentState) ⇒ <code>object</code>
+* [Router](#Router)
+    * [new Router([options])](#new_Router_new)
+    * [.start(options)](#Router+start) ⇒ [<code>Router</code>](#Router)
+    * [.stop()](#Router+stop) ⇒ [<code>Router</code>](#Router)
+    * [.isStarted()](#Router+isStarted) ⇒ <code>boolean</code>
+    * [.use(path, [middleware])](#Router+use) ⇒ [<code>Router</code>](#Router)
+    * [.get(path, ...middlewares)](#Router+get) ⇒ [<code>Router</code>](#Router)
+    * [.add(path, middlewares, unshift)](#Router+add) ⇒ [<code>RouteHandler</code>](#RouteHandler)
+    * [.remove(path, middleware)](#Router+remove) ⇒ <code>function</code> \| <code>void</code>
+    * [.createRequestContext(url, options)](#Router+createRequestContext) ⇒
+    * [.createResponseContext(req)](#Router+createResponseContext) ⇒
+    * [.findRouteHandler(req)](#Router+findRouteHandler) ⇒
+    * [.testRouteHandler(req, routeHandler)](#Router+testRouteHandler) ⇒ <code>boolean</code>
+    * [.handleError(error, req, res)](#Router+handleError)
+    * [.getErrorHandlerName(error)](#Router+getErrorHandlerName) ⇒ <code>string</code>
+    * [.navigate(url, [options])](#Router+navigate) ⇒ <code>Promise</code>
+    * [.isCurrentUrl(url)](#Router+isCurrentUrl) ⇒ <code>boolean</code>
+    * [.setCurrentUrl(url)](#Router+setCurrentUrl)
+    * [.browserPushState(url)](#Router+browserPushState)
+    * [.getCurrentState()](#Router+getCurrentState) ⇒ <code>object</code>
 
-<a name="new_Routing_new"></a>
+<a name="new_Router_new"></a>
 
-### new Routing([options])
-Creates an instance of Routing.
+### new Router([options])
+Creates an instance of Router.
 
 
 | Param | Type | Default |
 | --- | --- | --- |
 | [options] | [<code>routingOptions</code>](#routingOptions) | <code>{}</code> | 
 
-<a name="Routing+start"></a>
+<a name="Router+start"></a>
 
-### routing.start(options) ⇒ [<code>Routing</code>](#Routing)
+### router.start(options) ⇒ [<code>Router</code>](#Router)
 Starts routing with given options
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
-**Returns**: [<code>Routing</code>](#Routing) - Routing instance  
+**Kind**: instance method of [<code>Router</code>](#Router)  
+**Returns**: [<code>Router</code>](#Router) - Router instance  
 
 | Param | Type |
 | --- | --- |
 | options | [<code>startOptions</code>](#startOptions) | 
 
-<a name="Routing+stop"></a>
+<a name="Router+stop"></a>
 
-### routing.stop() ⇒ [<code>Routing</code>](#Routing)
+### router.stop() ⇒ [<code>Router</code>](#Router)
 Stops routing
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
-<a name="Routing+isStarted"></a>
+**Kind**: instance method of [<code>Router</code>](#Router)  
+<a name="Router+isStarted"></a>
 
-### routing.isStarted() ⇒ <code>boolean</code>
+### router.isStarted() ⇒ <code>boolean</code>
 Returns routing state. True if started
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
-<a name="Routing+use"></a>
+**Kind**: instance method of [<code>Router</code>](#Router)  
+<a name="Router+use"></a>
 
-### routing.use(path, [middleware]) ⇒ [<code>Routing</code>](#Routing)
+### router.use(path, [middleware]) ⇒ [<code>Router</code>](#Router)
 Unshift middleware for a given route.If path is a function then adds given middleware to global middlewares
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
-**Returns**: [<code>Routing</code>](#Routing) - routing instance  
+**Kind**: instance method of [<code>Router</code>](#Router)  
+**Returns**: [<code>Router</code>](#Router) - routing instance  
 
 | Param | Type |
 | --- | --- |
 | path | <code>string</code> \| <code>function</code> | 
 | [middleware] | <code>function</code> | 
 
-<a name="Routing+get"></a>
+<a name="Router+get"></a>
 
-### routing.get(path, ...middlewares) ⇒ [<code>Routing</code>](#Routing)
+### router.get(path, ...middlewares) ⇒ [<code>Router</code>](#Router)
 Adds given handlers to the routehandlerAlias for `add`
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
+**Kind**: instance method of [<code>Router</code>](#Router)  
 
 | Param | Type |
 | --- | --- |
 | path | <code>string</code> | 
 | ...middlewares | <code>function</code> | 
 
-<a name="Routing+add"></a>
+<a name="Router+add"></a>
 
-### routing.add(path, middlewares, unshift) ⇒ [<code>RouteHandler</code>](#RouteHandler)
+### router.add(path, middlewares, unshift) ⇒ [<code>RouteHandler</code>](#RouteHandler)
 Adds middlewares to a routeHandler by given pathIf routeHandler does not exists it will be created
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
+**Kind**: instance method of [<code>Router</code>](#Router)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -229,12 +229,12 @@ Adds middlewares to a routeHandler by given pathIf routeHandler does not exists
 | middlewares | <code>Array.&lt;function()&gt;</code> | array of handlers |
 | unshift | <code>boolean</code> | indicates should middlewares be added in the begining |
 
-<a name="Routing+remove"></a>
+<a name="Router+remove"></a>
 
-### routing.remove(path, middleware) ⇒ <code>function</code> \| <code>void</code>
+### router.remove(path, middleware) ⇒ <code>function</code> \| <code>void</code>
 Removes registered routeHandler if path param is a string and middleware param is undefined.Removes registered routehandler's middleware if path param is a string and middleware param is a functionRemoves global middleware if path param is a function
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
+**Kind**: instance method of [<code>Router</code>](#Router)  
 **Returns**: <code>function</code> \| <code>void</code> - removed middleware  
 
 | Param | Type |
@@ -242,12 +242,12 @@ Removes registered routeHandler if path param is a string and middleware param i
 | path | <code>string</code> \| <code>function</code> | 
 | middleware | <code>function</code> | 
 
-<a name="Routing+createRequestContext"></a>
+<a name="Router+createRequestContext"></a>
 
-### routing.createRequestContext(url, options) ⇒
+### router.createRequestContext(url, options) ⇒
 Creates RequestContext instance
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
+**Kind**: instance method of [<code>Router</code>](#Router)  
 **Returns**: RequestContext instance  
 
 | Param | Type | Description |
@@ -255,36 +255,36 @@ Creates RequestContext instance
 | url | <code>string</code> \| <code>URL</code> |  |
 | options | <code>\*</code> | request options |
 
-<a name="Routing+createResponseContext"></a>
+<a name="Router+createResponseContext"></a>
 
-### routing.createResponseContext(req) ⇒
+### router.createResponseContext(req) ⇒
 Creates ResponseContext instance
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
+**Kind**: instance method of [<code>Router</code>](#Router)  
 **Returns**: ResponseContext instance  
 
 | Param | Type |
 | --- | --- |
 | req | [<code>RequestContext</code>](#RequestContext) | 
 
-<a name="Routing+findRouteHandler"></a>
+<a name="Router+findRouteHandler"></a>
 
-### routing.findRouteHandler(req) ⇒
+### router.findRouteHandler(req) ⇒
 Finds routehandler by requestContext.Can also be used to find routehandler by path
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
+**Kind**: instance method of [<code>Router</code>](#Router)  
 **Returns**: RouteHandler instance  
 
 | Param | Type |
 | --- | --- |
 | req | <code>string</code> \| [<code>RequestContext</code>](#RequestContext) | 
 
-<a name="Routing+testRouteHandler"></a>
+<a name="Router+testRouteHandler"></a>
 
-### routing.testRouteHandler(req, routeHandler) ⇒ <code>boolean</code>
+### router.testRouteHandler(req, routeHandler) ⇒ <code>boolean</code>
 Tests RouteHandler instance against requestContext or path string
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
+**Kind**: instance method of [<code>Router</code>](#Router)  
 **Returns**: <code>boolean</code> - true if request path match routeHandler path  
 
 | Param | Type | Description |
@@ -292,12 +292,12 @@ Tests RouteHandler instance against requestContext or path string
 | req | <code>string</code> \| [<code>RequestContext</code>](#RequestContext) | path or requestContext |
 | routeHandler | [<code>RouteHandler</code>](#RouteHandler) |  |
 
-<a name="Routing+handleError"></a>
+<a name="Router+handleError"></a>
 
-### routing.handleError(error, req, res)
+### router.handleError(error, req, res)
 Handles request errors.Converts error to a handler name and tries to execute it.By default there is no any handlers, so you have to define it by yourself.
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
+**Kind**: instance method of [<code>Router</code>](#Router)  
 
 | Param | Type |
 | --- | --- |
@@ -305,69 +305,69 @@ Handles request errors.Converts error to a handler name and tries to execute it
 | req | [<code>RequestContext</code>](#RequestContext) | 
 | res | [<code>ResponseContext</code>](#ResponseContext) | 
 
-<a name="Routing+getErrorHandlerName"></a>
+<a name="Router+getErrorHandlerName"></a>
 
-### routing.getErrorHandlerName(error) ⇒ <code>string</code>
+### router.getErrorHandlerName(error) ⇒ <code>string</code>
 Converts response error to errorHandler name.If error instance of Error then `exception` name will be used.If error is a string then error value will be used as handler name.Otherwise `default`.
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
+**Kind**: instance method of [<code>Router</code>](#Router)  
 **Returns**: <code>string</code> - errorHandler name  
 
 | Param | Type |
 | --- | --- |
 | error | <code>\*</code> | 
 
-<a name="Routing+navigate"></a>
+<a name="Router+navigate"></a>
 
-### routing.navigate(url, [options]) ⇒ <code>Promise</code>
+### router.navigate(url, [options]) ⇒ <code>Promise</code>
 Tries to find registered routeHandler by path and execute its middlewares.If there is no such routeHandler then `notfound` errorHandler will be invoked.
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
+**Kind**: instance method of [<code>Router</code>](#Router)  
 
 | Param | Type | Default |
 | --- | --- | --- |
 | url | <code>\*</code> |  | 
 | [options] | <code>\*</code> | <code>{}</code> | 
 
-<a name="Routing+isCurrentUrl"></a>
+<a name="Router+isCurrentUrl"></a>
 
-### routing.isCurrentUrl(url) ⇒ <code>boolean</code>
+### router.isCurrentUrl(url) ⇒ <code>boolean</code>
 Checks if a given url is current or a new one
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
+**Kind**: instance method of [<code>Router</code>](#Router)  
 
 | Param | Type |
 | --- | --- |
 | url | <code>string</code> \| <code>URL</code> | 
 
-<a name="Routing+setCurrentUrl"></a>
+<a name="Router+setCurrentUrl"></a>
 
-### routing.setCurrentUrl(url)
+### router.setCurrentUrl(url)
 Stores given url as current.Method internally used by `navigate`
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
+**Kind**: instance method of [<code>Router</code>](#Router)  
 
 | Param | Type |
 | --- | --- |
 | url | <code>string</code> \| <code>URL</code> | 
 
-<a name="Routing+browserPushState"></a>
+<a name="Router+browserPushState"></a>
 
-### routing.browserPushState(url)
+### router.browserPushState(url)
 Pushes state to browser's historyMethod internally used by `navigate`
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
+**Kind**: instance method of [<code>Router</code>](#Router)  
 
 | Param | Type |
 | --- | --- |
 | url | <code>string</code> \| <code>URL</code> | 
 
-<a name="Routing+getCurrentState"></a>
+<a name="Router+getCurrentState"></a>
 
-### routing.getCurrentState() ⇒ <code>object</code>
+### router.getCurrentState() ⇒ <code>object</code>
 Returns current state object, by default return empty object.feel free to override.method internaly used by `browserPushState`
 
-**Kind**: instance method of [<code>Routing</code>](#Routing)  
+**Kind**: instance method of [<code>Router</code>](#Router)  
 <a name="RouteHandler"></a>
 
 ## RouteHandler
@@ -602,7 +602,7 @@ Routing configuration.You can provide your own versions of internal classes and
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | [trigger] | <code>boolean</code> | <code>true</code> | If true, will try to invoke handlers for current location |
-| [errorHandlers] | <code>Object.&lt;string, function()&gt;</code> |  | Error handlers to set into Routing instance |
+| [errorHandlers] | <code>Object.&lt;string, function()&gt;</code> |  | Error handlers to set into Router instance |
 | [replaceErrorHandlers] | <code>boolean</code> | <code>false</code> | Indicates how errorHandlers should be applied. default behavior is merge |
 | [useHashes] | <code>boolean</code> | <code>false</code> | Enables old school hash based routing |
 
@@ -614,5 +614,5 @@ Routing configuration.You can provide your own versions of internal classes and
 
 | Name | Type | Description |
 | --- | --- | --- |
-| [errorHandlers] | <code>Object.&lt;string, function()&gt;</code> | Error handlers to set into Routing instance |
+| [errorHandlers] | <code>Object.&lt;string, function()&gt;</code> | Error handlers to set into Router instance |
 

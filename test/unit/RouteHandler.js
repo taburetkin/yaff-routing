@@ -136,7 +136,7 @@ describe('RouteHandler', function() {
     let inst;
     const getReq = arg => inst.createRequestContext(arg || 'notfound/foo/bar');
     beforeEach(function() {
-      inst = new config.Routing();
+      inst = new config.Router();
     });
     it('should not throw if there is no arguments to extract', function() {
       let handler = new config.RouteHandler('found/foo/bar');

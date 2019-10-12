@@ -5,7 +5,7 @@ const fs = require('fs');
     files: [
       'index.js',
       'config.js',
-      'Routing.js',
+      'Router.js',
       'RouteHandler.js',
       'RequestContext.js',
       'ResponseContext.js'

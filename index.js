@@ -1,10 +1,10 @@
 import config from './config';
-import Routing from './Routing';
+import Router from './Router';
 import RouteHandler from './RouteHandler';
 import RequestContext from './RequestContext';
 import ResponseContext from './ResponseContext';
 
-config.Routing = Routing;
+config.Router = Router;
 config.RouteHandler = RouteHandler;
 config.RequestContext = RequestContext;
 config.ResponseContext = ResponseContext;
@@ -18,39 +18,39 @@ export default {
   /**
    * Returns current routing instance. If it does not exist instance will be created.
    * @private
-   * @returns {Routing} routing instance
+   * @returns {Router} routing instance
    */
-  _ensureRouting() {
+  _ensureRouter() {
     if (!this.instance) {
-      this.instance = this.createRouting();
+      this.instance = this.createRouter();
     }
     return this.instance;
   },
 
   /**
-   * Creates instance of Routing with config.routingOptions.
-   * @returns {Routing} Routing instance
+   * Creates instance of Router with config.routingOptions.
+   * @returns {Router} Router instance
    */
-  createRouting() {
-    return new config.Routing(config.routingOptions);
+  createRouter() {
+    return new config.Router(config.routingOptions);
   },
 
   /**
-   * Proxy method to Routing instance's `get`
-   * @see {@link Routing.get}
-   * @returns {Routing}
+   * Proxy method to Router instance's `get`
+   * @see {@link Router.get}
+   * @returns {Router}
    */
   get(...args) {
-    return this._ensureRouting().get(...args);
+    return this._ensureRouter().get(...args);
   },
 
   /**
-   * Proxy method to Routing instance's `use`
-   * @see {@link Routing.use}
-   * @returns {Routing}
+   * Proxy method to Router instance's `use`
+   * @see {@link Router.use}
+   * @returns {Router}
    */
   use(...args) {
-    return this._ensureRouting().use(...args);
+    return this._ensureRouter().use(...args);
   },
 
   /**
@@ -66,17 +66,17 @@ export default {
 
   /**
    * Starts routing
-   * @see {@link Routing.start}
-   * @returns {Routing}
+   * @see {@link Router.start}
+   * @returns {Router}
    */
   start(...args) {
-    return this._ensureRouting().start(...args);
+    return this._ensureRouter().start(...args);
   },
 
   /**
    * Stops routing
-   * @see {@link Routing.stop}
-   * @returns {Routing}
+   * @see {@link Router.stop}
+   * @returns {Router}
    */
   stop(...args) {
     return this.isStarted() && this.instance.stop(...args);
@@ -84,8 +84,8 @@ export default {
 
   /**
    * Removes middleware or middleware's handler.
-   * Proxy method for Routing instance's `remove`.
-   * @see {@link Routing.stop}
+   * Proxy method for Router instance's `remove`.
+   * @see {@link Router.stop}
    * @returns {(RouteHandler|void)}
    */
   remove(...args) {
@@ -97,11 +97,14 @@ export default {
 
   /**
    * Initiates the request.
-   * Proxy method for Routing instance's `navigate`.
-   * @see {@link Routing.navigate}
+   * Proxy method for Router instance's `navigate`.
+   * @see {@link Router.navigate}
    */
   navigate(...args) {
-    return this._ensureRouting().navigate(...args);
+    if (!this.instance) {
+      return;
+    }
+    return this.instance.navigate(...args);
   },
 
   /**

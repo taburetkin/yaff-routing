@@ -1,7 +1,7 @@
 const config = routing.config;
-const DefaultRouting = config.Routing;
+const DefaultRouter = config.Router;
 const handler1 = (req, res, next) => next && next();
-const proto = DefaultRouting.prototype;
+const proto = DefaultRouter.prototype;
 let route = '';
 
 function _try(cb) {
@@ -23,87 +23,87 @@ describe('general routing', function() {
     delete routing.instance;
   });
 
-  describe('instantiating Routing', function() {
+  describe('instantiating Router', function() {
     beforeEach(function() {
       routing.stop();
       routing.instance = null;
     });
-    describe('when using default Routing', function() {
-      const Routing = DefaultRouting;
-      it('should instantiate Routing on get', function() {
+    describe('when using default Router', function() {
+      const Router = DefaultRouter;
+      it('should instantiate Router on get', function() {
         routing.get('', handler1);
-        expect(routing.instance).to.be.instanceof(Routing);
+        expect(routing.instance).to.be.instanceof(Router);
       });
-      it('should instantiate Routing on use', function() {
+      it('should instantiate Router on use', function() {
         routing.use(handler1);
-        expect(routing.instance).to.be.instanceof(Routing);
+        expect(routing.instance).to.be.instanceof(Router);
       });
-      it('should instantiate Routing on start', function() {
+      it('should instantiate Router on start', function() {
         routing.start();
-        expect(routing.instance).to.be.instanceof(Routing);
+        expect(routing.instance).to.be.instanceof(Router);
       });
-      it('should instantiate Routing on remove', function() {
-        routing.start();
-        expect(routing.instance).to.be.instanceof(Routing);
+      it('should not instantiate Router on remove', function() {
+        routing.remove(() => {});
+        expect(routing.instance == null).to.be.true;
       });
-      it('should instantiate Routing on navigate', function() {
-        routing.start();
-        expect(routing.instance).to.be.instanceof(Routing);
+      it('should not instantiate Router on navigate', function() {
+        routing.navigate('test');
+        expect(routing.instance == null).to.be.true;
       });
     });
 
-    describe('when using custom Routing', function() {
-      class Routing extends DefaultRouting {}
+    describe('when using custom Router', function() {
+      class Router extends DefaultRouter {}
 
       beforeEach(function() {
-        config.Routing = Routing;
+        config.Router = Router;
       });
       afterEach(function() {
-        config.Routing = DefaultRouting;
+        config.Router = DefaultRouter;
       });
 
-      it('should instantiate Routing on get', function() {
+      it('should instantiate Router on get', function() {
         routing.get('', handler1);
-        expect(routing.instance).to.be.instanceof(Routing);
+        expect(routing.instance).to.be.instanceof(Router);
       });
-      it('should instantiate Routing on use', function() {
+      it('should instantiate Router on use', function() {
         routing.use(handler1);
-        expect(routing.instance).to.be.instanceof(Routing);
+        expect(routing.instance).to.be.instanceof(Router);
       });
-      it('should instantiate Routing on start', function() {
+      it('should instantiate Router on start', function() {
         routing.start();
-        expect(routing.instance).to.be.instanceof(Routing);
+        expect(routing.instance).to.be.instanceof(Router);
       });
-      it('should instantiate Routing on remove', function() {
+      it('should instantiate Router on remove', function() {
         routing.start();
-        expect(routing.instance).to.be.instanceof(Routing);
+        expect(routing.instance).to.be.instanceof(Router);
       });
-      it('should instantiate Routing on navigate', function() {
+      it('should instantiate Router on navigate', function() {
         routing.start();
-        expect(routing.instance).to.be.instanceof(Routing);
+        expect(routing.instance).to.be.instanceof(Router);
       });
     });
   });
-  describe('creatingRouting', function() {
-    describe('when used default Routing', function() {
+  describe('createRouter', function() {
+    describe('when used default Router', function() {
       it('should return routing instance', function() {
-        let instance = routing.createRouting();
-        expect(instance).to.be.instanceof(config.Routing);
+        let instance = routing.createRouter();
+        expect(instance).to.be.instanceof(config.Router);
       });
     });
-    describe('when used custom Routing', function() {
-      class Routing extends DefaultRouting {}
+    describe('when used custom Router', function() {
+      class Router extends DefaultRouter {}
 
       beforeEach(function() {
-        config.Routing = Routing;
+        config.Router = Router;
       });
       afterEach(function() {
-        config.Routing = DefaultRouting;
+        config.Router = DefaultRouter;
       });
 
       it('should return routing instance', function() {
-        let instance = routing.createRouting();
-        expect(instance).to.be.instanceof(Routing);
+        let instance = routing.createRouter();
+        expect(instance).to.be.instanceof(Router);
       });
     });
   });
@@ -114,8 +114,8 @@ describe('general routing', function() {
       routing.get(route, handler1);
     });
 
-    it('should create instance of Routing', function() {
-      expect(routing.instance).to.be.instanceof(config.Routing);
+    it('should create instance of Router', function() {
+      expect(routing.instance).to.be.instanceof(config.Router);
     });
     it('should proxy call to the routing instance', function() {
       expect(spy).to.be.calledOnce;
@@ -129,8 +129,8 @@ describe('general routing', function() {
       routing.use(route, handler1);
     });
 
-    it('should create instance of Routing', function() {
-      expect(routing.instance).to.be.instanceof(config.Routing);
+    it('should create instance of Router', function() {
+      expect(routing.instance).to.be.instanceof(config.Router);
     });
     it('should proxy call to the routing instance', function() {
       expect(spy).to.be.calledOnce;
@@ -148,8 +148,8 @@ describe('general routing', function() {
       routing.start(...callArgs);
     });
 
-    it('should create instance of Routing', function() {
-      expect(routing.instance).to.be.instanceof(config.Routing);
+    it('should create instance of Router', function() {
+      expect(routing.instance).to.be.instanceof(config.Router);
     });
     it('should proxy call to the routing instance', function() {
       expect(spy).to.be.calledOnce;
@@ -168,8 +168,8 @@ describe('general routing', function() {
       routing.stop();
     });
 
-    it('should not create instance of Routing', function() {
-      expect(routing.instance).to.be.not.instanceof(config.Routing);
+    it('should not create instance of Router', function() {
+      expect(routing.instance).to.be.not.instanceof(config.Router);
     });
     it('should not proxy call to the routing instance', function() {
       expect(spy).to.not.be.called;
@@ -191,8 +191,8 @@ describe('general routing', function() {
     });
 
     describe('when instance is not exist', function() {
-      it('should not create instance of Routing', function() {
-        expect(routing.instance).to.be.not.instanceof(config.Routing);
+      it('should not create instance of Router', function() {
+        expect(routing.instance).to.be.not.instanceof(config.Router);
       });
       it('should return false', function() {
         expect(isStarted()).to.be.false;
@@ -236,7 +236,7 @@ describe('general routing', function() {
       spy = sandbox.spy(proto, 'remove');
     });
 
-    it('should not create instance of Routing', function() {
+    it('should not create instance of Router', function() {
       routing.remove(handler1);
       expect(routing.instance).to.be.undefined;
     });

@@ -1,6 +1,6 @@
 import routing from '../..';
 const config = routing.config;
-const DefaultRouting = config.Routing;
+const DefaultRouter = config.Router;
 const DefaultRouteHandler = config.RouteHandler;
 const DefaultResponseContext = config.ResponseContext;
 const DefaultRequestContext = config.RequestContext;
@@ -18,17 +18,17 @@ const handler2 = (req, res, next) => next && next();
 
 let route = '';
 
-describe('Routing', function() {
+describe('Router', function() {
   let instance;
   beforeEach(function() {
-    instance = new DefaultRouting();
+    instance = new DefaultRouter();
     instance.get(route, handler1);
     config.isStarted = false;
     global.history.states = [{ url: global.baseUrl.toString() }];
   });
 
   afterEach(function() {
-    config.Routing = DefaultRouting;
+    config.Router = DefaultRouter;
     config.RouteHandler = DefaultRouteHandler;
     config.RequestContext = DefaultRequestContext;
     config.ResponseContext = DefaultResponseContext;
@@ -327,7 +327,7 @@ describe('Routing', function() {
       let spyError2;
       let spyDefault;
       beforeEach(function() {
-        instance = new DefaultRouting({
+        instance = new DefaultRouter({
           errorHandlers: {
             default: () => 'default',
             error1: () => 'error1',

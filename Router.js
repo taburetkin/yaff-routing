@@ -5,23 +5,23 @@ import RoutesManager from './RoutesManager';
 /**
  * @typedef {Object} startOptions
  * @prop {boolean=} [trigger=true] - If true, will try to invoke handlers for current location
- * @prop {Object.<string, function>=} errorHandlers - Error handlers to set into Routing instance
+ * @prop {Object.<string, function>=} errorHandlers - Error handlers to set into Router instance
  * @prop {boolean=} [replaceErrorHandlers=false] - Indicates how errorHandlers should be applied. default behavior is merge
  * @prop {boolean=} [useHashes=false] - Enables old school hash based routing
  */
 
 /**
  * @typedef {Object} routingOptions
- * @prop {Object.<string, function>=} errorHandlers - Error handlers to set into Routing instance
+ * @prop {Object.<string, function>=} errorHandlers - Error handlers to set into Router instance
  */
 
 /**
  * Manipulates existing routeHandlers, global middlewares and processes the requests
  * @prop {RoutesManager} routes - Holds all registered routeHandlers
  */
-class Routing {
+class Router {
   /**
-   * Creates an instance of Routing.
+   * Creates an instance of Router.
    * @param {routingOptions} [options={}]
    */
   constructor(options = {}) {
@@ -34,8 +34,8 @@ class Routing {
   /**
    * Starts routing with given options
    * @param {startOptions} options
-   * @returns {Routing} Routing instance
-   * @memberof Routing
+   * @returns {Router} Router instance
+   * @memberof Router
    */
   start(options) {
     if (typeof options != 'object') {
@@ -70,7 +70,7 @@ class Routing {
   /**
    * Sets onpopstate handler to reflect on history go forward/back.
    * @private
-   * @memberof Routing
+   * @memberof Router
    */
   _setOnPopstate() {
     this._onPopstate = event => {
@@ -89,7 +89,7 @@ class Routing {
   /**
    * removes onpopstate handler
    * @private
-   * @memberof Routing
+   * @memberof Router
    */
   _removeOnPopstate() {
     if (typeof this._onPopstate == 'function') {
@@ -99,8 +99,8 @@ class Routing {
   }
   /**
    * Stops routing
-   * @returns {Routing}
-   * @memberof Routing
+   * @returns {Router}
+   * @memberof Router
    */
   stop() {
     config.isStarted = false;
@@ -121,8 +121,8 @@ class Routing {
    * If path is a function then adds given middleware to global middlewares
    * @param {(string|function)} path
    * @param {function=} middleware
-   * @returns {Routing} routing instance
-   * @memberof Routing
+   * @returns {Router} routing instance
+   * @memberof Router
    */
   use(path, middleware) {
     if (typeof path === 'function') {
@@ -146,8 +146,8 @@ class Routing {
    * Alias for `add`
    * @param {string} path
    * @param {...function} middlewares
-   * @returns {Routing}
-   * @memberof Routing
+   * @returns {Router}
+   * @memberof Router
    */
   get(path, ...middlewares) {
     this.add(path, middlewares);
@@ -161,7 +161,7 @@ class Routing {
    * @param {function[]} middlewares array of handlers
    * @param {boolean} unshift indicates should middlewares be added in the begining
    * @returns {RouteHandler}
-   * @memberof Routing
+   * @memberof Router
    */
   add(path, middlewares, unshift) {
     if (path == null) {
@@ -179,7 +179,7 @@ class Routing {
    * @param {(string|function)} path
    * @param {function} middleware
    * @returns {(function|void)} removed middleware
-   * @memberof Routing
+   * @memberof Router
    */
   remove(path, middleware) {
     if (typeof path === 'function') {
@@ -212,7 +212,7 @@ class Routing {
    * @private
    * @param {*} path
    * @returns {RouteHandler}
-   * @memberof Routing
+   * @memberof Router
    */
   _ensureRouteHanlder(path) {
     let routeHandler = this.routes.get(path);
@@ -240,7 +240,7 @@ class Routing {
    * @param {(string|URL)} url
    * @param {*} options - request options
    * @returns RequestContext instance
-   * @memberof Routing
+   * @memberof Router
    */
   createRequestContext(url, options) {
     return new config.RequestContext(this._getUrl(url), options);
@@ -250,7 +250,7 @@ class Routing {
    * Creates ResponseContext instance
    * @param {RequestContext} req
    * @returns ResponseContext instance
-   * @memberof Routing
+   * @memberof Router
    */
   createResponseContext(req) {
     return new config.ResponseContext(req);
@@ -264,7 +264,7 @@ class Routing {
    * @private
    * @param {(string|URL)} url
    * @param {*} options
-   * @memberof Routing
+   * @memberof Router
    */
   async _processRequest(url, options) {
     // creating requestContext and responseContext
@@ -294,7 +294,7 @@ class Routing {
    * Can also be used to find routehandler by path
    * @param {(string|RequestContext)} req
    * @returns RouteHandler instance
-   * @memberof Routing
+   * @memberof Router
    */
   findRouteHandler(req) {
     req = this._getReq(req);
@@ -310,7 +310,7 @@ class Routing {
    * @param {(string|RequestContext)} req path or requestContext
    * @param {RouteHandler} routeHandler
    * @returns {boolean} true if request path match routeHandler path
-   * @memberof Routing
+   * @memberof Router
    */
   testRouteHandler(req, routeHandler) {
     req = this._getReq(req);
@@ -324,7 +324,7 @@ class Routing {
    * @param {(string|Error)} error
    * @param {RequestContext} req
    * @param {ResponseContext} res
-   * @memberof Routing
+   * @memberof Router
    */
   handleError(error, req, res) {
     let errorKey = this.getErrorHandlerName(error);
@@ -344,7 +344,7 @@ class Routing {
    * Otherwise `default`.
    * @param {*} error
    * @returns {string} errorHandler name
-   * @memberof Routing
+   * @memberof Router
    */
   getErrorHandlerName(error) {
     if (error instanceof Error) {
@@ -392,7 +392,7 @@ class Routing {
    * @param {*} url
    * @param {*} [options={}]
    * @returns {Promise}
-   * @memberof Routing
+   * @memberof Router
    */
   navigate(url, options = {}) {
     this._ensureStarted();
@@ -425,7 +425,7 @@ class Routing {
    * Checks if a given url is current or a new one
    * @param {(string|URL)} url
    * @returns {boolean}
-   * @memberof Routing
+   * @memberof Router
    */
   isCurrentUrl(url) {
     url = this._getUrl(url);
@@ -436,7 +436,7 @@ class Routing {
    * Stores given url as current.
    * Method internally used by `navigate`
    * @param {(string|URL)} url
-   * @memberof Routing
+   * @memberof Router
    */
   setCurrentUrl(url) {
     url = this._getUrl(url);
@@ -447,7 +447,7 @@ class Routing {
    * Pushes state to browser's history
    * Method internally used by `navigate`
    * @param {(string|URL)} url
-   * @memberof Routing
+   * @memberof Router
    */
   browserPushState(url, options) {
     url = this._getUrl(url);
@@ -460,7 +460,7 @@ class Routing {
    * feel free to override.
    * method internaly used by `browserPushState`
    * @returns {object}
-   * @memberof Routing
+   * @memberof Router
    */
   getCurrentState(opts) {
     let navigateOptions = { ...opts };
@@ -476,13 +476,13 @@ class Routing {
    * Throws if routing isStarted equals to given value.
    * @private
    * @param {boolean} [value=false]
-   * @returns {Routing}
-   * @memberof Routing
+   * @returns {Router}
+   * @memberof Router
    */
   _ensureStarted(value = false) {
     let message = value ? 'already' : 'not yet';
     if (this.isStarted() === value) {
-      throw new Error(`Routing ${message} started`);
+      throw new Error(`Router ${message} started`);
     }
     return this;
   }
@@ -491,7 +491,7 @@ class Routing {
    * wraps string url into URL
    * @param {string} url
    * @returns {URL}
-   * @memberof Routing
+   * @memberof Router
    * @private
    */
   _getUrl(url) {
@@ -504,7 +504,7 @@ class Routing {
    * @private
    * @param {(string|RequestContext)} arg
    * @returns {RequestContext} requestContext instance
-   * @memberof Routing
+   * @memberof Router
    */
   _getReq(arg) {
     if (arg instanceof config.RequestContext) {
@@ -515,4 +515,4 @@ class Routing {
   //#endregion
 }
 
-export default Routing;
+export default Router;
