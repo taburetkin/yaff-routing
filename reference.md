@@ -55,11 +55,11 @@ This is main module.By Default its only the thing you should use working with f
     * [.createRouter()](#module_routing.createRouter) ⇒ [<code>Router</code>](#Router)
     * [.get()](#module_routing.get) ⇒ [<code>Router</code>](#Router)
     * [.use()](#module_routing.use) ⇒ [<code>Router</code>](#Router)
-    * [.isStarted()](#module_routing.isStarted) ⇒ <code>boolean</code>
-    * [.start()](#module_routing.start) ⇒ [<code>Router</code>](#Router)
+    * [.start([options])](#module_routing.start) ⇒ [<code>Router</code>](#Router)
     * [.stop()](#module_routing.stop) ⇒ [<code>Router</code>](#Router)
     * [.remove()](#module_routing.remove) ⇒ [<code>RouteHandler</code>](#RouteHandler) \| <code>void</code>
     * [.navigate()](#module_routing.navigate)
+    * [.isStarted()](#module_routing.isStarted) ⇒ <code>boolean</code>
 
 <a name="module_routing.config"></a>
 
@@ -85,23 +85,21 @@ Proxy method to Router instance's `get`
 <a name="module_routing.use"></a>
 
 ### routing.use() ⇒ [<code>Router</code>](#Router)
-Proxy method to Router instance's `use`
+If called with only one argument and that argument is instance of Router then tries tp setup provided router as main router,otherwise proxies call to Router instance's `use`
 
 **Kind**: static method of [<code>routing</code>](#module_routing)  
 **See**: [Router.use](Router.use)  
-<a name="module_routing.isStarted"></a>
-
-### routing.isStarted() ⇒ <code>boolean</code>
-Returns true if routing started
-
-**Kind**: static method of [<code>routing</code>](#module_routing)  
 <a name="module_routing.start"></a>
 
-### routing.start() ⇒ [<code>Router</code>](#Router)
+### routing.start([options]) ⇒ [<code>Router</code>](#Router)
 Starts routing
 
 **Kind**: static method of [<code>routing</code>](#module_routing)  
-**See**: [Router.start](Router.start)  
+
+| Param | Type |
+| --- | --- |
+| [options] | [<code>startOptions</code>](#startOptions) | 
+
 <a name="module_routing.stop"></a>
 
 ### routing.stop() ⇒ [<code>Router</code>](#Router)
@@ -123,6 +121,12 @@ Initiates the request.Proxy method for Router instance's `navigate`.
 
 **Kind**: static method of [<code>routing</code>](#module_routing)  
 **See**: [Router.navigate](Router.navigate)  
+<a name="module_routing.isStarted"></a>
+
+### routing.isStarted() ⇒ <code>boolean</code>
+Returns routing state. True if started
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
 <a name="Router"></a>
 
 ## Router
@@ -138,17 +142,14 @@ Manipulates existing routeHandlers, global middlewares and processes the request
 
 * [Router](#Router)
     * [new Router([options])](#new_Router_new)
-    * [.start(options)](#Router+start) ⇒ [<code>Router</code>](#Router)
-    * [.stop()](#Router+stop) ⇒ [<code>Router</code>](#Router)
-    * [.isStarted()](#Router+isStarted) ⇒ <code>boolean</code>
+    * [.isRoutingStarted()](#Router+isRoutingStarted) ⇒ <code>boolean</code>
+    * [.isNested()](#Router+isNested) ⇒ <code>boolean</code>
     * [.use(path, [middleware])](#Router+use) ⇒ [<code>Router</code>](#Router)
     * [.get(path, ...middlewares)](#Router+get) ⇒ [<code>Router</code>](#Router)
     * [.add(path, middlewares, unshift)](#Router+add) ⇒ [<code>RouteHandler</code>](#RouteHandler)
     * [.remove(path, middleware)](#Router+remove) ⇒ <code>function</code> \| <code>void</code>
     * [.createRequestContext(url, options)](#Router+createRequestContext) ⇒
     * [.createResponseContext(req)](#Router+createResponseContext) ⇒
-    * [.findRouteHandler(req)](#Router+findRouteHandler) ⇒
-    * [.testRouteHandler(req, routeHandler)](#Router+testRouteHandler) ⇒ <code>boolean</code>
     * [.handleError(error, req, res)](#Router+handleError)
     * [.getErrorHandlerName(error)](#Router+getErrorHandlerName) ⇒ <code>string</code>
     * [.navigate(url, [options])](#Router+navigate) ⇒ <code>Promise</code>
@@ -167,28 +168,16 @@ Creates an instance of Router.
 | --- | --- | --- |
 | [options] | [<code>routingOptions</code>](#routingOptions) | <code>{}</code> | 
 
-<a name="Router+start"></a>
+<a name="Router+isRoutingStarted"></a>
 
-### router.start(options) ⇒ [<code>Router</code>](#Router)
-Starts routing with given options
-
-**Kind**: instance method of [<code>Router</code>](#Router)  
-**Returns**: [<code>Router</code>](#Router) - Router instance  
-
-| Param | Type |
-| --- | --- |
-| options | [<code>startOptions</code>](#startOptions) | 
-
-<a name="Router+stop"></a>
-
-### router.stop() ⇒ [<code>Router</code>](#Router)
-Stops routing
-
-**Kind**: instance method of [<code>Router</code>](#Router)  
-<a name="Router+isStarted"></a>
-
-### router.isStarted() ⇒ <code>boolean</code>
+### router.isRoutingStarted() ⇒ <code>boolean</code>
 Returns routing state. True if started
+
+**Kind**: instance method of [<code>Router</code>](#Router)  
+<a name="Router+isNested"></a>
+
+### router.isNested() ⇒ <code>boolean</code>
+Returns `true` if router is registered as subrouter
 
 **Kind**: instance method of [<code>Router</code>](#Router)  
 <a name="Router+use"></a>
@@ -266,31 +255,6 @@ Creates ResponseContext instance
 | Param | Type |
 | --- | --- |
 | req | [<code>RequestContext</code>](#RequestContext) | 
-
-<a name="Router+findRouteHandler"></a>
-
-### router.findRouteHandler(req) ⇒
-Finds routehandler by requestContext.Can also be used to find routehandler by path
-
-**Kind**: instance method of [<code>Router</code>](#Router)  
-**Returns**: RouteHandler instance  
-
-| Param | Type |
-| --- | --- |
-| req | <code>string</code> \| [<code>RequestContext</code>](#RequestContext) | 
-
-<a name="Router+testRouteHandler"></a>
-
-### router.testRouteHandler(req, routeHandler) ⇒ <code>boolean</code>
-Tests RouteHandler instance against requestContext or path string
-
-**Kind**: instance method of [<code>Router</code>](#Router)  
-**Returns**: <code>boolean</code> - true if request path match routeHandler path  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| req | <code>string</code> \| [<code>RequestContext</code>](#RequestContext) | path or requestContext |
-| routeHandler | [<code>RouteHandler</code>](#RouteHandler) |  |
 
 <a name="Router+handleError"></a>
 
@@ -386,25 +350,32 @@ Represents handler for a given string route.When request occurs and request pat
 
 
 * [RouteHandler](#RouteHandler)
-    * [new RouteHandler(url)](#new_RouteHandler_new)
+    * [new RouteHandler(url, [router])](#new_RouteHandler_new)
+    * [.isRouter()](#RouteHandler+isRouter) ⇒ <code>boolean</code>
     * [.addMiddlewares(middlewares)](#RouteHandler+addMiddlewares)
     * [.addMiddleware(middleware)](#RouteHandler+addMiddleware)
     * [.removeMiddleware(middleware)](#RouteHandler+removeMiddleware) ⇒ <code>function</code> \| <code>void</code>
     * [.removeMiddlewares(middlewares)](#RouteHandler+removeMiddlewares) ⇒ <code>void</code>
     * [.hasMiddleware(middleware)](#RouteHandler+hasMiddleware) ⇒ <code>boolean</code>
     * [.extractRouteArguments(req)](#RouteHandler+extractRouteArguments) ⇒ <code>Object.&lt;string, \*&gt;</code>
-    * [.testRequest(req)](#RouteHandler+testRequest) ⇒ <code>boolean</code>
 
 <a name="new_RouteHandler_new"></a>
 
-### new RouteHandler(url)
+### new RouteHandler(url, [router])
 Creates an instance of RouteHandler.
 
 
 | Param | Type |
 | --- | --- |
 | url | <code>string</code> \| <code>URL</code> | 
+| [router] | [<code>Router</code>](#Router) | 
 
+<a name="RouteHandler+isRouter"></a>
+
+### routeHandler.isRouter() ⇒ <code>boolean</code>
+Returns true if this handler is Router based
+
+**Kind**: instance method of [<code>RouteHandler</code>](#RouteHandler)  
 <a name="RouteHandler+addMiddlewares"></a>
 
 ### routeHandler.addMiddlewares(middlewares)
@@ -465,17 +436,6 @@ Returns true if given middleware is present in middlewares array
 
 ### routeHandler.extractRouteArguments(req) ⇒ <code>Object.&lt;string, \*&gt;</code>
 Extracts route arguments into key-value object.`path/:foo/:bar` vs `path/oof/rab` = `{ foo: 'oof', bar: 'rab'}`.repeated names will be overriden so, DONT do this: `path/:foo/:foo`
-
-**Kind**: instance method of [<code>RouteHandler</code>](#RouteHandler)  
-
-| Param | Type |
-| --- | --- |
-| req | [<code>RequestContext</code>](#RequestContext) | 
-
-<a name="RouteHandler+testRequest"></a>
-
-### routeHandler.testRequest(req) ⇒ <code>boolean</code>
-Test's given requestContext's string path against handler's route pattern.Returns true on match.
 
 **Kind**: instance method of [<code>RouteHandler</code>](#RouteHandler)  
 

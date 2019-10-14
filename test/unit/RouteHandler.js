@@ -22,6 +22,10 @@ describe('RouteHandler', function() {
     });
 
     describe('addMiddlewares', function() {
+      it('should throw if routeHandler is Router based', function() {
+        let handler = new config.RouteHandler('test', new config.Router());
+        expect(handler.addMiddlewares.bind(handler, [() => {}])).to.throw();
+      });
       it('should add middlewares to the end', function() {
         let spy1 = sinon.spy();
         let spy2 = sinon.spy();
@@ -44,6 +48,10 @@ describe('RouteHandler', function() {
       it('should throw if middleware is not a function', function() {
         expect(handler.addMiddleware.bind(handler)).to.throw();
       });
+      it('should throw if routeHandler is Router based', function() {
+        let handler = new config.RouteHandler('test', new config.Router());
+        expect(handler.addMiddleware.bind(handler, () => {})).to.throw();
+      });
     });
     describe('removeMiddleware', function() {
       it('should not remove if middleware is not exist', function() {
@@ -56,6 +64,10 @@ describe('RouteHandler', function() {
         handler.removeMiddleware(mw1);
         expect(handler.middlewares.length).to.be.equal(1);
         expect(handler.middlewares[0]).to.be.equal(mw2);
+      });
+      it('should throw if routeHandler is Router based', function() {
+        let handler = new config.RouteHandler('test', new config.Router());
+        expect(handler.removeMiddleware.bind(handler, () => {})).to.throw();
       });
     });
     describe('removeMiddlewares', function() {
@@ -70,6 +82,10 @@ describe('RouteHandler', function() {
         handler.removeMiddlewares([mw1, mw2]);
         expect(handler.middlewares.length).to.be.equal(0);
       });
+      it('should throw if routeHandler is Router based', function() {
+        let handler = new config.RouteHandler('test', new config.Router());
+        expect(handler.removeMiddlewares.bind(handler, [() => {}])).to.throw();
+      });
     });
     describe('hasMiddleware', function() {
       it('should return false for not exist middleware', function() {
@@ -82,34 +98,97 @@ describe('RouteHandler', function() {
       });
     });
   });
+  describe('router', function() {
+    //let handler;
+    beforeEach(function() {});
+    afterEach(function() {
+      routing.stop();
+      sinon.restore();
+    });
+    it('should call setRouter when initialized with router', function() {
+      let router = new config.Router();
+      let spy = sinon.spy(config.RouteHandler.prototype, 'setRouter');
+      new config.RouteHandler('foo/bar', router);
+      expect(spy).to.be.calledOnce.and.calledWith(router);
+    });
+    it('should not call setRouter when initialized without router', function() {
+      let spy = sinon.spy(config.RouteHandler.prototype, 'setRouter');
+      new config.RouteHandler('foo/bar');
+      expect(spy).to.not.been.called;
+    });
+    describe('setRouter', function() {
+      let router;
+      let anotherRouter;
+      let handler;
+      beforeEach(function() {
+        handler = new config.RouteHandler();
+        router = new config.Router();
+        anotherRouter = new config.Router();
+      });
+      it('should set router if there is no routers', function() {
+        handler.setRouter(router);
+        expect(handler.isRouter()).to.be.true;
+      });
+      it('should set router and remove middlewares if there is no routers', function() {
+        handler.addMiddlewares([() => {}], [() => {}]);
+        handler.setRouter(router);
+        expect(handler.isRouter()).to.be.true;
+        expect(handler.middlewares.length).to.be.equal(0);
+      });
+      it('should be able replace router by another router', function() {
+        handler.setRouter(router);
+        handler.setRouter(anotherRouter);
+        expect(handler.isRouter()).to.be.true;
+        expect(handler.router).to.be.equal(anotherRouter);
+      });
+      it('should be able to remove router at all', function() {
+        handler.setRouter(router);
+        handler.setRouter(null);
+        expect(handler.isRouter()).to.be.false;
+        expect(handler.router).to.be.null;
+      });
+    });
+  });
   describe('processRequest', function() {
     let reqItem;
-    before(function() {
+    beforeEach(function() {
       routing.get(':controller/:action(/:id)(/)', req => {
         reqItem = req;
       });
       routing.start();
     });
-    after(function() {
+    afterEach(function() {
       routing.stop();
       delete routing.instance;
     });
 
-    it('args should contain all arguments when optional parameter filled', function() {
-      routing.navigate('foo/bar/baz');
-      expect(reqItem.args).to.be.eql({
-        controller: 'foo',
-        action: 'bar',
-        id: 'baz'
+    describe('requestContext route arguments', function() {
+      it('args should contain all arguments when optional parameter filled', function() {
+        routing.navigate('foo/bar/baz');
+        expect(reqItem.args).to.be.eql({
+          controller: 'foo',
+          action: 'bar',
+          id: 'baz'
+        });
       });
-    });
 
-    it('args should contain all route arguments', function() {
-      routing.navigate('foo/bar');
-      expect(reqItem.args).to.be.eql({
-        controller: 'foo',
-        action: 'bar',
-        id: undefined
+      it('args should contain all route arguments', function() {
+        routing.navigate('foo/bar');
+        expect(reqItem.args).to.be.eql({
+          controller: 'foo',
+          action: 'bar',
+          id: undefined
+        });
+      });
+
+      it('should collect arguments with similar name into array', function() {
+        routing.get('testargs/:id/:id/:id', req => {
+          reqItem = req;
+        });
+        routing.navigate('testargs/foo/bar/baz');
+        expect(reqItem.args).to.be.eql({
+          id: ['foo', 'bar', 'baz']
+        });
       });
     });
 

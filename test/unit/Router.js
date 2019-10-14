@@ -1,4 +1,6 @@
 import routing from '../..';
+import { buildSegments } from '../../utils';
+import PathContext from '../../PathContext';
 const config = routing.config;
 const DefaultRouter = config.Router;
 const DefaultRouteHandler = config.RouteHandler;
@@ -21,10 +23,10 @@ let route = '';
 describe('Router', function() {
   let instance;
   beforeEach(function() {
+    routing.stop();
     instance = new DefaultRouter();
+    routing.use(instance);
     instance.get(route, handler1);
-    config.isStarted = false;
-    global.history.states = [{ url: global.baseUrl.toString() }];
   });
 
   afterEach(function() {
@@ -35,89 +37,13 @@ describe('Router', function() {
     document.location.href = 'http://localhost';
   });
 
-  describe('start and stop', function() {
-    it('when started and stoped config.isStarted should became true or false respectively', function() {
-      expect(config.isStarted).to.be.false;
-      instance.start();
-      expect(config.isStarted).to.be.true;
-      instance.stop();
-      expect(config.isStarted).to.be.false;
-    });
-    it('should not throw if stoped before started', function() {
-      expect(instance.stop.bind(instance)).to.not.throw();
-      expect(instance.stop.bind(instance)).to.not.throw();
-    });
-    it('when started should throw on second start if it was not stopped', function() {
-      instance.start();
-      expect(instance.start.bind(instance)).to.throw();
-    });
-    it('should not throw if started after stop', function() {
-      instance.start();
-      instance.stop();
-      expect(instance.start.bind(instance)).to.not.throw();
-    });
-    it('should not trigger on start if trigger is false', function() {
-      let spy = this.sinon.spy(instance, 'navigate');
-      instance.start({ trigger: false });
-      expect(spy).to.not.been.called;
-    });
-    it('should trigger on start if trigger is true', function() {
-      let spy = this.sinon.spy(instance, 'navigate');
-      instance.start({ trigger: true });
-      expect(spy).to.be.calledOnce;
-    });
-    it('should trigger on start if trigger is not set', function() {
-      let spy = this.sinon.spy(instance, 'navigate');
-      instance.start({});
-      expect(spy).to.be.calledOnce;
-    });
-    it('should take useHashes option on start', function() {
-      config.useHashes = false;
-      instance.start({ useHashes: true });
-      expect(config.useHashes).to.be.true;
-      instance.stop();
-      instance.start({ useHashes: false });
-      expect(config.useHashes).to.be.false;
-    });
-    it('should call setErrorHandlers if errorHandlers passed', function() {
-      let spy = this.sinon.spy(instance, 'setErrorHandlers');
-      let handlers = {
-        test: handler1
-      };
-      instance.start({
-        errorHandlers: handlers
-      });
-      expect(spy).to.be.calledOnce;
-      expect(spy.getCall(0).args).to.be.eql([undefined, handlers]);
-    });
-    it('should call setErrorHandlers with correct replaceErrorHandlers options if errorHandlers passed and ', function() {
-      let spy = this.sinon.spy(instance, 'setErrorHandlers');
-      let handlers = {
-        test: handler1
-      };
-      instance.start({
-        replaceErrorHandlers: false,
-        errorHandlers: handlers
-      });
-      expect(spy).to.be.calledOnce;
-      expect(spy.getCall(0).args).to.be.eql([false, handlers]);
-
-      instance.stop();
-      instance.start({
-        replaceErrorHandlers: true,
-        errorHandlers: handlers
-      });
-      expect(spy.getCall(1).args).to.be.eql([true, handlers]);
-    });
-  });
-
-  describe('isStarted', function() {
-    it('should return false if not started and true if started', function() {
-      expect(instance.isStarted()).to.be.false;
-      instance.start();
-      expect(instance.isStarted()).to.be.true;
-      instance.stop();
-      expect(instance.isStarted()).to.be.false;
+  describe('isRoutingStarted', function() {
+    it('should return false if routing not started and true if started', function() {
+      expect(instance.isRoutingStarted()).to.be.false;
+      routing.start();
+      expect(instance.isRoutingStarted()).to.be.true;
+      routing.stop();
+      expect(instance.isRoutingStarted()).to.be.false;
     });
   });
 
@@ -184,8 +110,15 @@ describe('Router', function() {
       let res = instance.add(undefined, []);
       expect(res).to.be.undefined;
     });
-    it('should return routeHandler if arguments correct', function() {
+    it('should return routeHandler if arguments correct and it supposed to be regular handler', function() {
       let res = instance.add('', [handler1]);
+      expect(res).to.be.instanceOf(config.RouteHandler);
+    });
+    it("should throw if arguments correct and it's already initialized as regular routeHandler and `add` called with Router argument", function() {
+      expect(instance.add.bind(instance, '', new config.Router())).to.throw();
+    });
+    it('should return routeHandler if arguments correct and it supposed to be Router handler', function() {
+      let res = instance.add('somenewroute', new config.Router());
       expect(res).to.be.instanceOf(config.RouteHandler);
     });
     it('should return routeHandler if provided custom RouteHandler Class', function() {
@@ -268,39 +201,7 @@ describe('Router', function() {
       expect(context).to.be.instanceOf(config.ResponseContext);
     });
   });
-  describe('findRouteHandler', function() {
-    beforeEach(function() {
-      instance.get('route1/subroute1', handler1);
-      instance.get('route1', handler1);
-      instance.get('route2/subroute2', handler2);
-      instance.get('route2', handler2);
-    });
-    it('should return routeHandler', function() {
-      let handler = instance.findRouteHandler('route2');
-      expect(handler).to.be.instanceOf(config.RouteHandler);
-      expect(handler.hasMiddleware(handler2)).to.be.true;
-      expect(handler.path).to.be.equal('/route2');
 
-      handler = instance.findRouteHandler('route2/subroute2');
-      expect(handler).to.be.instanceOf(config.RouteHandler);
-      expect(handler.hasMiddleware(handler2)).to.be.true;
-      expect(handler.path).to.be.equal('/route2/subroute2');
-    });
-  });
-  describe('testRouteHandler', function() {
-    beforeEach(function() {
-      instance.get('route1/subroute1', handler1);
-      instance.get('route1', handler1);
-      instance.get('route2/subroute2', handler2);
-      instance.get('route2', handler2);
-    });
-    it('should return correct handler', function() {
-      let handler = instance.findRouteHandler('route2');
-      let spy = this.sinon.spy(DefaultRouteHandler.prototype, 'testRequest');
-      instance.testRouteHandler('', handler);
-      expect(spy).to.be.calledOnce;
-    });
-  });
   describe('error handling', function() {
     describe('getErrorHandlerName', function() {
       it('should return `exception` if error is instanceof Error', function() {
@@ -415,33 +316,36 @@ describe('Router', function() {
           res.setError(OopsError);
         });
 
-        instance.start();
+        routing.start();
       });
 
       describe('when called', function() {
         //let spy;
         beforeEach(function() {
-          errorHandle = this.sinon.spy(instance, 'handleError');
+          errorHandle = sinon.spy(instance, 'handleError');
         });
-
-        it('should be called with `notfound` if there is no route handler', function() {
-          instance.navigate('foo/bar');
+        afterEach(function() {
+          sinon.restore();
+        });
+        it('should be called with `notfound` if there is no route handler', async function() {
+          //expect(routing.instance).to.be.equal(instance);
+          await routing.navigate('foo/bar');
           expect(errorHandle).to.be.calledOnce.and.calledWith('notfound');
         });
         it('should be called with given custom error', async function() {
-          await instance.navigate('custom');
+          await routing.navigate('custom');
           expect(errorHandle).to.be.calledOnce.and.calledWith('custom');
         });
         it('should be called with js error', async function() {
-          await instance.navigate('javascript');
+          await routing.navigate('javascript');
           expect(errorHandle).to.be.calledOnce.and.calledWith(OopsError);
         });
         it('should be called with js error when throw', async function() {
-          await instance.navigate('throw');
+          await routing.navigate('throw');
           expect(errorHandle).to.be.calledOnce.and.calledWith(OopsError);
         });
         it('should be called with given custom error', async function() {
-          await instance.navigate('custom');
+          await routing.navigate('custom');
           expect(errorHandle).to.be.calledOnce.and.calledWith('custom');
         });
       });
@@ -449,11 +353,16 @@ describe('Router', function() {
   });
 
   describe('navigate', function() {
+    let instance;
     beforeEach(function() {
-      instance.start({ trigger: false });
+      instance = routing.instance = new config.Router();
+      routing.start({ trigger: false });
+    });
+    afterEach(function() {
+      routing.stop();
     });
     it('should throw if not started', function() {
-      instance.stop();
+      routing.stop();
       expect(instance.navigate.bind(instance)).to.throw();
     });
     it("should call routeHandler's processRequest with passed globalMiddlewares if routeHandler exist", function() {
@@ -466,9 +375,10 @@ describe('Router', function() {
       expect(spy.getCall(0).args[2].globalMiddlewares).to.be.eql([glblmw]);
     });
     it('should delegate to correct routeHandler with strictly defined routes', function() {
-      let res = '';
+      let res = 'x';
       let mw1 = hndl(() => (res = 'foo'));
       let mw2 = hndl(() => (res = 'foo/bar'));
+
       instance.get('foo', mw1);
       instance.get('foo/bar', mw2);
 
@@ -488,48 +398,6 @@ describe('Router', function() {
 
       instance.navigate('foo/bar');
       expect(res).to.be.equal('foo/bar');
-    });
-    it('should delegate to correct routeHandler', function() {
-      let res = '';
-      let mw1 = hndl(r => (res = `${r.args.action}:${r.args.id}`));
-      let mw2 = hndl(() => (res = `some`));
-
-      instance.get('foo/:action/some', mw2);
-      instance.get('foo/:action/:id', mw1);
-      instance.get('foo/:action', mw1);
-
-      instance.navigate('foo/bar');
-      expect(res).to.be.equal('bar:undefined');
-      res = 0;
-
-      instance.navigate('foo');
-      expect(res).to.be.equal(0);
-
-      instance.navigate('foo/bar/some');
-      expect(res).to.be.equal('some');
-
-      instance.navigate('foo/bar/123');
-      expect(res).to.be.equal('bar:123');
-      res = 0;
-
-      instance.navigate('foo/bar/123/123');
-      expect(res).to.be.equal(0);
-
-      instance.get('bar/:action-foo(-:id)', mw1);
-      instance.navigate('bar/bar-foo');
-      expect(res).to.be.equal('bar:undefined');
-      instance.navigate('bar/bar-foo-123');
-      expect(res).to.be.equal('bar:123');
-
-      instance.get('bar/:action-:id/(baraban)', mw1);
-      instance.navigate('bar/bar-foo/');
-      expect(res).to.be.equal('bar:foo');
-
-      instance.navigate('bar/barbar-foofofo/baraban');
-      expect(res).to.be.equal('barbar:foofofo');
-
-      instance.navigate('bar/piw-piw/caravan');
-      expect(res).to.be.equal('barbar:foofofo');
     });
 
     describe('trailingSlash', function() {
@@ -554,109 +422,346 @@ describe('Router', function() {
         expect(mw2.callCount).to.be.equal(2);
       });
     });
+    describe('navigation with routers v2', function() {
+      let counters;
+      let inc;
+      let gmw1;
+      let gmw2;
+      let gmw3;
+      let acc;
+      let art;
+      let argumentsSpy;
+      const makeInc = (key, cb) => {
+        return (...args) => {
+          inc(key);
+          if (cb) {
+            cb(...args);
+          }
+        };
+      };
+      beforeEach(function() {
+        argumentsSpy = sinon.spy();
+        counters = {};
+        inc = sinon.spy(key => {
+          counters[key] = counters[key] ? ++counters[key] : 1;
+        });
+        routing.stop();
+        routing.instance = new config.Router();
+        routing.start({
+          trigger: false,
+          errorHandlers: {
+            notfound: () => {
+              inc('notfound');
+            }
+          }
+        });
+        gmw1 = sinon.spy((r, e, n) => n());
+        gmw2 = sinon.spy((r, e, n) => n());
+        gmw3 = sinon.spy((r, e, n) => n());
+
+        acc = new config.Router();
+        acc.get('', makeInc('acc'));
+        acc.get('login', makeInc('acc/login'));
+        acc.get('register', makeInc('acc/register'));
+        acc.use(gmw2);
+
+        art = new config.Router();
+        art.get('', makeInc('art'));
+        art.get(':id', makeInc('art/:id'));
+        art.use(gmw3);
+
+        art.use('shmacc', acc);
+
+        let subtest = new config.Router();
+        subtest.get(
+          ':subdivision(/:id)',
+          makeInc(':division/:subdivion', req => argumentsSpy(req.args))
+        );
+        let test = new config.Router();
+        test.use(':division', subtest);
+
+        routing.use(gmw1);
+        routing.use('acc', acc);
+        routing.use('art', art);
+        routing.use('test', test);
+      });
+      it("should correctly process nested router's request", async function() {
+        await routing.navigate('acc/login');
+        expect(counters['acc/login']).to.be.equal(1);
+        expect(gmw1, 'gmw1').to.be.calledOnce;
+        expect(gmw2, 'gmw2').to.be.calledOnce;
+
+        await routing.navigate('art');
+        expect(counters['art']).to.be.equal(1);
+        expect(gmw1.callCount, 'gmw1').to.be.equal(2);
+        expect(gmw3, 'gmw3').to.be.calledOnce;
+
+        await routing.navigate('art/shmacc');
+        expect(counters['acc']).to.be.equal(1);
+        expect(gmw1.callCount, 'gmw1').to.be.equal(3);
+        expect(gmw2.callCount, 'gmw2').to.be.equal(2);
+        expect(gmw3.callCount, 'gmw3').to.be.equal(2);
+      });
+      it('should execute nested router routeHandler and args should be ok', async function() {
+        await routing.navigate('test/pupkin/arts/aboutCats');
+
+        expect(counters[':division/:subdivion']).to.be.equal(1);
+        expect(argumentsSpy).to.be.calledOnce.and.calledWith({
+          division: 'pupkin',
+          subdivision: 'arts',
+          id: 'aboutCats'
+        });
+      });
+    });
+    describe('navigation v2', function() {
+      let counters;
+      let inc;
+      const keyedInc = key => {
+        routing.get(key, () => {
+          inc(key);
+        });
+      };
+      beforeEach(function() {
+        counters = {};
+        inc = sinon.spy(key => {
+          counters[key] = counters[key] ? ++counters[key] : 1;
+        });
+        routing.stop();
+        routing.instance = new config.Router();
+        routing.start({
+          trigger: false,
+          errorHandlers: {
+            notfound: () => {
+              inc('notfound');
+            }
+          }
+        });
+      });
+
+      it('static routes should have priority over parametrized', async function() {
+        keyedInc('foo/:bar');
+        keyedInc('foo/bar');
+
+        await routing.navigate('foo/bar');
+
+        expect(counters['foo/bar']).to.be.equal(1);
+        expect(counters['foo/:bar']).to.be.undefined;
+
+        await routing.navigate('foo/zoo');
+
+        expect(counters['foo/bar']).to.be.equal(1);
+        expect(counters['foo/:bar']).to.be.equal(1);
+      });
+      it('should choose correct handler', async function() {
+        keyedInc('');
+        keyedInc(':foo/:zoo');
+        keyedInc(':foo(/bar)/:zoo');
+
+        await routing.navigate('abra/kadabra');
+        expect(counters[':foo/:zoo']).to.be.equal(1);
+
+        await routing.navigate('abra/bar/kadabra');
+        expect(counters[':foo(/bar)/:zoo']).to.be.equal(1);
+      });
+      it('should delegate to correct routeHandler', async function() {
+        keyedInc('foo/:action/:id');
+        keyedInc('foo/:action/some');
+        keyedInc('foo/:action');
+        keyedInc('bar/:action-foo(-:id)');
+        keyedInc('bar/:action-:id/(baraban)');
+
+        await routing.navigate('foo/bar');
+        expect(counters['foo/:action']).to.be.equal(1);
+        expect(inc.callCount).to.be.equal(1);
+
+        await routing.navigate('foo');
+        expect(counters['notfound'], 'foo').to.be.equal(1);
+        expect(inc.callCount).to.be.equal(2);
+
+        await routing.navigate('foo/bar/some');
+        expect(counters['foo/:action/some'], 'foo/bar/some').to.be.equal(1);
+        expect(inc.callCount).to.be.equal(3);
+
+        await routing.navigate('foo/bar/123');
+        expect(counters['foo/:action/:id'], 'foo/bar/123').to.be.equal(1);
+        expect(inc.callCount).to.be.equal(4);
+
+        await routing.navigate('foo/bar/123/123');
+        expect(counters['notfound'], 'foo/bar/123/123').to.be.equal(2);
+        expect(inc.callCount).to.be.equal(5);
+
+        await routing.navigate('bar/bar-foo');
+        expect(counters['bar/:action-foo(-:id)'], 'bar/bar-foo').to.be.equal(1);
+        expect(inc.callCount).to.be.equal(6);
+
+        await routing.navigate('bar/bar-foo-123');
+        expect(
+          counters['bar/:action-foo(-:id)'],
+          'bar/bar-foo-123'
+        ).to.be.equal(2);
+        expect(inc.callCount).to.be.equal(7);
+
+        await routing.navigate('bar/bar-foo/');
+        expect(counters['bar/:action-foo(-:id)'], 'bar/bar-foo/').to.be.equal(
+          3
+        );
+        expect(inc.callCount).to.be.equal(8);
+
+        await routing.navigate('bar/barbar-foofofo/baraban');
+        expect(
+          counters['bar/:action-:id/(baraban)'],
+          'bar/barbar-foofofo/baraban'
+        ).to.be.equal(1);
+        expect(inc.callCount).to.be.equal(9);
+
+        await routing.navigate('bar/piw-piw/caravan');
+        expect(counters['notfound'], 'bar/piw-piw/caravan').to.be.equal(3);
+        expect(inc.callCount).to.be.equal(10);
+
+        await routing.navigate('bar/bar-foo-gooose/');
+        expect(counters['bar/:action-foo(-:id)'], '').to.be.equal(4);
+        expect(inc.callCount).to.be.equal(11);
+
+        await routing.navigate('bar/bar-foo-mooose/');
+        expect(
+          counters['bar/:action-foo(-:id)'],
+          'bar/bar-foo-mooose/'
+        ).to.be.equal(5);
+        expect(inc.callCount).to.be.equal(12);
+      });
+      // it.only('trying to catch optional coverage', async function() {
+      //   keyedInc('bar/:action-:id(/baraban)');
+      //   await routing.navigate('bar/barbar-foofofo/baraban');
+      //   console.log(counters);
+      //   await routing.navigate('bar/barbar-foofofo');
+      //   console.log(counters);
+      //   let rh = routing.instance.routes.items[0];
+      //   let path = '/optional/capro(/id)';
+      //   let o = rh.regexPatterns;
+      //   let route = path
+      //     .replace(o.escapeRegExp, '\\$&')
+      //     .replace(o.optionalParam, '(?:$1)?')
+      //     .replace(o.namedParam, (match, optional) => {
+      //       console.log('YAY', optional, match);
+      //       return optional ? match : '([^/?]+)';
+      //     })
+      //     .replace(o.splatParam, '([^?]*?)');
+      //   console.log(route);
+      //   /*
+      //   keyedInc('optional/capro(/:id)');
+      //   //path = '/optional/capro(/:id)';
+
+      //   */
+      // });
+    });
   });
   describe('hash based navigate', function() {
+    let counters;
+    let inc;
+    const keyedInc = key => {
+      routing.get(key, () => {
+        inc(key);
+      });
+    };
     beforeEach(function() {
-      instance.start({ trigger: false, useHashes: true });
+      config.useHashes = true;
+      counters = {};
+      inc = sinon.spy(key => {
+        counters[key] = counters[key] ? ++counters[key] : 1;
+      });
+      routing.stop();
+      routing.instance = new config.Router();
+      routing.start({
+        trigger: false,
+        errorHandlers: {
+          notfound: () => {
+            inc('notfound');
+          }
+        }
+      });
     });
-
-    it('should delegate to correct routeHandler', function() {
-      let res = '';
-      let mw1 = hndl(r => (res = `${r.args.action}:${r.args.id}`));
-      let mw2 = hndl(() => (res = `some`));
-
-      instance.get('foo/:action/some', mw2);
-      instance.get('foo/:action/:id', mw1);
-      instance.get('foo/:action', mw1);
-
-      instance.navigate('foo/bar');
-      expect(res).to.be.equal('bar:undefined');
-      res = 0;
-
-      instance.navigate('foo');
-      expect(res).to.be.equal(0);
-
-      instance.navigate('foo/bar/some');
-      expect(res).to.be.equal('some');
-
-      instance.navigate('foo/bar/123');
-      expect(res).to.be.equal('bar:123');
-      res = 0;
-
-      instance.navigate('foo/bar/123/123');
-      expect(res).to.be.equal(0);
+    afterEach(function() {
+      config.useHashes = false;
     });
+    it('static routes should have priority over parametrized', async function() {
+      keyedInc('foo/:bar');
+      keyedInc('foo/bar');
 
-    it('should delegate to correct routeHandler with strictly defined routes', function() {
-      let res = '';
-      let mw1 = hndl(() => (res = 'foo'));
-      let mw2 = hndl(() => (res = 'foo/bar'));
-      instance.get('foo', mw1);
-      instance.get('foo/bar', mw2);
+      await routing.navigate('foo/bar');
 
-      instance.navigate('foo/bar');
-      expect(res).to.be.equal('foo/bar');
+      expect(counters['foo/bar']).to.be.equal(1);
+      expect(counters['foo/:bar']).to.be.undefined;
 
-      instance.navigate('foo');
-      expect(res).to.be.equal('foo');
+      await routing.navigate('foo/zoo');
 
-      instance.remove('foo');
-      instance.remove('foo/bar');
-      instance.get('foo', mw1);
-      instance.get('foo/bar', mw2);
-
-      instance.navigate('foo');
-      expect(res).to.be.equal('foo');
-
-      instance.navigate('foo/bar');
-      expect(res).to.be.equal('foo/bar');
+      expect(counters['foo/bar']).to.be.equal(1);
+      expect(counters['foo/:bar']).to.be.equal(1);
     });
+    it('should choose correct handler', async function() {
+      keyedInc('');
+      keyedInc(':foo/:zoo');
+      keyedInc(':foo(/bar)/:zoo');
 
-    it('should change hash instead path', function() {
-      let path = 'foo/bar/zoo';
-      instance.get(path, () => {});
-      instance.navigate(path);
-      expect(document.location.hash).to.be.equal('#' + path);
-    });
-  });
-  describe('popstate', function() {
-    let mw1;
-    let mw2;
-    let mw3;
-    let mw4;
-    let nav;
-    beforeEach(function() {
-      mw1 = sinon.spy();
-      mw2 = sinon.spy();
-      mw3 = sinon.spy();
-      mw4 = sinon.spy();
-      nav = sinon.spy(instance, 'navigate');
-      instance.get('route1', mw1);
-      instance.get('route2', mw2);
-      instance.get('route3', mw3);
-      instance.get('route4', mw4);
-      instance.start({ trigger: false });
-    });
-    it('should call navigate on popstate', async function() {
-      await instance.navigate('route1');
-      await instance.navigate('route2');
-      await instance.navigate('route3');
-      await instance.navigate('route4');
-      await history.popState();
+      await routing.navigate('abra/kadabra');
+      expect(counters[':foo/:zoo']).to.be.equal(1);
 
-      expect(nav.callCount).to.be.equal(5);
-      expect(mw3).to.be.calledTwice;
+      await routing.navigate('abra/bar/kadabra');
+      expect(counters[':foo(/bar)/:zoo']).to.be.equal(1);
     });
-    it('should be able handle wrong popstate', async function() {
-      await instance.navigate('route1');
-      expect(history.popState.bind(history)).to.not.throw();
-      await instance.navigate('route1');
-      await instance.navigate('route1');
-      expect(
-        history.popState.bind(history, { wrongArgs: true })
-      ).to.not.throw();
+    it('should delegate to correct routeHandler', async function() {
+      keyedInc('foo/:action/:id');
+      keyedInc('foo/:action/some');
+      keyedInc('foo/:action');
+      keyedInc('bar/:action-foo(-:id)');
+      keyedInc('bar/:action-:id/(baraban)');
 
-      expect(window.onpopstate).to.not.throw();
+      await routing.navigate('foo/bar');
+      expect(counters['foo/:action']).to.be.equal(1);
+      expect(inc.callCount).to.be.equal(1);
+
+      await routing.navigate('foo');
+      expect(counters['notfound']).to.be.equal(1);
+      expect(inc.callCount).to.be.equal(2);
+
+      await routing.navigate('foo/bar/some');
+      expect(counters['foo/:action/some']).to.be.equal(1);
+      expect(inc.callCount).to.be.equal(3);
+
+      await routing.navigate('foo/bar/123');
+      expect(counters['foo/:action/:id']).to.be.equal(1);
+      expect(inc.callCount).to.be.equal(4);
+
+      await routing.navigate('foo/bar/123/123');
+      expect(counters['notfound']).to.be.equal(2);
+      expect(inc.callCount).to.be.equal(5);
+
+      await routing.navigate('bar/bar-foo');
+      expect(counters['bar/:action-foo(-:id)']).to.be.equal(1);
+      expect(inc.callCount).to.be.equal(6);
+
+      await routing.navigate('bar/bar-foo-123');
+      expect(counters['bar/:action-foo(-:id)']).to.be.equal(2);
+      expect(inc.callCount).to.be.equal(7);
+
+      await routing.navigate('bar/bar-foo/');
+      expect(counters['bar/:action-foo(-:id)']).to.be.equal(3);
+      expect(inc.callCount).to.be.equal(8);
+
+      await routing.navigate('bar/barbar-foofofo/baraban');
+      expect(counters['bar/:action-:id/(baraban)']).to.be.equal(1);
+      expect(inc.callCount).to.be.equal(9);
+
+      await routing.navigate('bar/piw-piw/caravan');
+      expect(counters['notfound']).to.be.equal(3);
+      expect(inc.callCount).to.be.equal(10);
+
+      await routing.navigate('bar/bar-foo-gooose/');
+      expect(counters['bar/:action-foo(-:id)']).to.be.equal(4);
+      expect(inc.callCount).to.be.equal(11);
+
+      await routing.navigate('bar/bar-foo-mooose/');
+      expect(counters['bar/:action-foo(-:id)']).to.be.equal(5);
+      expect(inc.callCount).to.be.equal(12);
     });
   });
 });

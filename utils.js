@@ -84,3 +84,57 @@ export function url(...chunks) {
 
   return chunks.join('');
 }
+
+export function addValue(entity, key, value) {
+  if (Array.isArray(entity[key])) {
+    entity[key].push(value);
+  } else if (key in entity) {
+    entity[key] = [entity[key], value];
+  } else {
+    entity[key] = value;
+  }
+}
+
+export function buildSegments(url) {
+  url = getUrl(url);
+  let paths = url.pathname.substring(1);
+  paths = paths.replace(/\(\/\)$/, '').replace(/\(\//g, '/(');
+  let result = paths.split('/');
+  if (result.length > 1 && !result[result.length - 1]) {
+    result.pop();
+  }
+  return result;
+}
+
+function cmp(a, b, fn) {
+  let av = fn(a);
+  let bv = fn(b);
+  return av < bv ? -1 : av > bv ? 1 : 0;
+}
+
+export function compare(a, b, arg) {
+  let result = 0;
+  if (typeof arg == 'function') {
+    return cmp(a, b, arg);
+  } else if (Array.isArray(arg)) {
+    arg.every(fn => {
+      result = compare(a, b, fn);
+      return result === 0;
+    });
+  }
+  return result;
+}
+
+export function comparator(...cmps) {
+  let result = 0;
+  if (
+    cmps.every(([a, b, arg]) => {
+      result = compare(a, b, arg);
+      return result === 0;
+    })
+  ) {
+    return 0;
+  } else {
+    return result;
+  }
+}

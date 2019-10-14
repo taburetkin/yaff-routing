@@ -1,6 +1,6 @@
 import { getUrl, buildPath } from './utils';
 import config from './config';
-
+import PathContext from './PathContext';
 /**
  * Represents request state.
  * @prop {Object.<string, string>} args - holds route arguments
@@ -19,6 +19,8 @@ class RequestContext {
     this.options = options;
     this.url = this._getUrl(url);
     this.path = this._buildPath();
+    this._path = new PathContext(this.path);
+    this.segments = this.buildSegments(this.path);
     this.args = {};
 
     // converts url's `search` to { key : values } object
@@ -44,7 +46,11 @@ class RequestContext {
   _buildPath() {
     return buildPath(this.url, config.useHashes);
   }
-
+  buildSegments(paths) {
+    let arr = paths.split(/[?|#]/);
+    let result = arr[0].split('/').filter(Boolean);
+    return result;
+  }
   /**
    * builds simplified version of URLSearchParameters
    * @private

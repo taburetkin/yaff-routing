@@ -22,5 +22,25 @@ describe('RequestContext', function() {
       expect(context.query.param1).to.be.eql(['foo', 'baz']);
       expect(context.query.param2).to.be.equal('bar');
     });
+    it('should build foo/bar/zoo segments from path', function() {
+      let paths = [
+        'foo/bar/zoo',
+        '/foo/bar/zoo',
+        '/foo/bar/zoo/',
+        'foo/bar/zoo/',
+        'foo/bar/zoo/#path',
+        'foo/bar/zoo/?qwe=zxc#path',
+        new URL('foo/bar/zoo/?qwe=zxc#path', document.location.origin),
+        new URL('/foo/bar/zoo/', document.location.origin)
+      ];
+      paths.forEach(path => {
+        let req = new config.RequestContext(path);
+        expect(req.segments, 'failed at ' + path).to.be.eql([
+          'foo',
+          'bar',
+          'zoo'
+        ]);
+      });
+    });
   });
 });

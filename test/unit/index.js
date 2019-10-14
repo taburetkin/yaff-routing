@@ -139,52 +139,126 @@ describe('general routing', function() {
       routing.use(handler1);
       expect(spy.getCall(1).args).to.be.eql([handler1]);
     });
+    describe('when called with Router instance', function() {
+      let initialized;
+      beforeEach(function() {
+        initialized = new DefaultRouter();
+      });
+      it('should throw if there is already initialized and started Router', function() {
+        routing.start();
+        expect(routing.use.bind(routing, initialized)).to.throw();
+      });
+      it('should set up provided router instance as main router if there is no initialized router yet', function() {
+        routing.use(initialized);
+        expect(routing.instance).to.be.equal(initialized);
+      });
+      it('should set up provided router instance as main router if initialized router is not started yet', function() {
+        routing.use(() => {});
+        routing.use(initialized);
+        expect(routing.instance).to.be.equal(initialized);
+      });
+      it('should set up provided router instance as main router if initialized router is stoped', function() {
+        routing.use(() => {});
+        routing.start();
+        routing.stop();
+        routing.use(initialized);
+        expect(routing.instance).to.be.equal(initialized);
+      });
+    });
   });
-  describe('start', function() {
-    let spy;
-    let callArgs = [1, 2, 3];
-    beforeEach(function() {
-      spy = sandbox.spy(proto, 'start');
-      routing.start(...callArgs);
-    });
 
-    it('should create instance of Router', function() {
-      expect(routing.instance).to.be.instanceof(config.Router);
-    });
-    it('should proxy call to the routing instance', function() {
-      expect(spy).to.be.calledOnce;
-      expect(spy.getCall(0).args).to.be.eql(callArgs);
-    });
-    // it("should throw an error on start if already started", function() {
-    //   expect(routing.start.bind(routing)).to.throw;
-    // });
-  });
-
-  describe('stop', function() {
-    let spy;
-    let callArgs = [1, 2, 3];
+  describe('start and stop', function() {
     beforeEach(function() {
-      spy = sandbox.spy(proto, 'stop');
+      //routing.instance = new config.Router();
+    });
+    afterEach(function() {
       routing.stop();
     });
 
+    it('should create instance of Router', function() {
+      routing.start();
+      expect(routing.instance).to.be.instanceof(config.Router);
+    });
     it('should not create instance of Router', function() {
+      routing.stop();
       expect(routing.instance).to.be.not.instanceof(config.Router);
     });
-    it('should not proxy call to the routing instance', function() {
-      expect(spy).to.not.be.called;
-    });
-    it('should proxy call to the routing instance if instance exist', function() {
+    it('should not throw if there is no onPopstate handler', function() {
       routing.start();
-      routing.stop(...callArgs);
-
+      routing._onPopstate = null;
+      expect(routing.stop.bind(routing)).to.not.throw();
+    });
+    it('should not throw if stoped before started', function() {
+      expect(routing.stop.bind(routing)).to.not.throw();
+      expect(routing.stop.bind(routing)).to.not.throw();
+    });
+    it('when started should throw on second start if it was not stopped', function() {
+      routing.start();
+      expect(routing.start.bind(routing)).to.throw();
+    });
+    it('should not throw if started after stop', function() {
+      routing.start();
+      routing.stop();
+      expect(routing.start.bind(routing)).to.not.throw();
+    });
+    it('should not trigger on start if trigger is false', function() {
+      let spy = this.sinon.spy(routing, 'navigate');
+      routing.start({ trigger: false });
+      expect(spy).to.not.been.called;
+    });
+    it('should trigger on start if trigger is true', function() {
+      let spy = this.sinon.spy(routing, 'navigate');
+      routing.start({ trigger: true });
       expect(spy).to.be.calledOnce;
-      expect(spy.getCall(0).args).to.be.eql(callArgs);
+    });
+    it('should trigger on start if trigger is not set', function() {
+      let spy = this.sinon.spy(routing, 'navigate');
+      routing.start({});
+      expect(spy).to.be.calledOnce;
+    });
+    it('should take useHashes option on start', function() {
+      config.useHashes = false;
+      routing.start({ useHashes: true });
+      expect(config.useHashes).to.be.true;
+      routing.stop();
+      routing.start({ useHashes: false });
+      expect(config.useHashes).to.be.false;
+    });
+    it('should call setErrorHandlers if errorHandlers passed', function() {
+      routing.instance = new config.Router();
+      let spy = this.sinon.spy(routing.instance, 'setErrorHandlers');
+      let handlers = {
+        test: handler1
+      };
+      routing.start({
+        errorHandlers: handlers
+      });
+      expect(spy).to.be.calledOnce;
+      expect(spy.getCall(0).args).to.be.eql([undefined, handlers]);
+    });
+    it('should call setErrorHandlers with correct replaceErrorHandlers options if errorHandlers passed and ', function() {
+      routing.instance = new config.Router();
+      let spy = this.sinon.spy(routing.instance, 'setErrorHandlers');
+      let handlers = {
+        test: handler1
+      };
+      routing.start({
+        replaceErrorHandlers: false,
+        errorHandlers: handlers
+      });
+      expect(spy).to.be.calledOnce;
+      expect(spy.getCall(0).args).to.be.eql([false, handlers]);
+
+      routing.stop();
+      routing.start({
+        replaceErrorHandlers: true,
+        errorHandlers: handlers
+      });
+      expect(spy.getCall(1).args).to.be.eql([true, handlers]);
     });
   });
 
   describe('isStarted', function() {
-    let spy;
     let isStarted;
     beforeEach(function() {
       isStarted = () => routing.isStarted();
@@ -203,11 +277,12 @@ describe('general routing', function() {
         routing.use(handler1);
       });
 
-      it('should proxy call to the routing instance', function() {
-        spy = sandbox.spy(proto, 'isStarted');
-        routing.isStarted();
-        expect(spy).to.be.calledOnce;
-      });
+      // it('should proxy call to the routing instance', function() {
+      //   spy = sandbox.spy(proto, 'isStarted');
+      //   routing.isStarted();
+      //   expect(spy).to.be.calledOnce;
+      // });
+
       it('should return false if instance is not started', function() {
         expect(isStarted()).to.be.false;
       });
@@ -264,6 +339,49 @@ describe('general routing', function() {
       routing.navigate(1, 2, 3);
       expect(spy).to.be.calledOnce;
       expect(spy.getCall(0).args).to.be.eql([1, 2, 3]);
+    });
+  });
+  describe('popstate', function() {
+    let mw1;
+    let mw2;
+    let mw3;
+    let mw4;
+    let nav;
+    beforeEach(function() {
+      mw1 = sinon.spy();
+      mw2 = sinon.spy();
+      mw3 = sinon.spy();
+      mw4 = sinon.spy();
+      nav = sinon.spy(routing, 'navigate');
+      routing.get('route1', mw1);
+      routing.get('route2', mw2);
+      routing.get('route3', mw3);
+      routing.get('route4', mw4);
+      routing.start({ trigger: false });
+    });
+    afterEach(function() {
+      sinon.restore();
+    });
+    it('should call navigate on popstate', async function() {
+      await routing.navigate('route1');
+      await routing.navigate('route2');
+      await routing.navigate('route3');
+      await routing.navigate('route4');
+      await history.popState();
+
+      expect(nav.callCount).to.be.equal(5);
+      expect(mw3).to.be.calledTwice;
+    });
+    it('should be able handle wrong popstate', async function() {
+      await routing.navigate('route1');
+      expect(history.popState.bind(history)).to.not.throw();
+      await routing.navigate('route1');
+      await routing.navigate('route1');
+      expect(
+        history.popState.bind(history, { wrongArgs: true })
+      ).to.not.throw();
+
+      expect(window.onpopstate).to.not.throw();
     });
   });
 });

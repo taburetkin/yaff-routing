@@ -1,5 +1,5 @@
 import config from './config';
-import { getUrl } from './utils';
+import { getUrl, comparator } from './utils';
 import RoutesManager from './RoutesManager';
 
 /**
@@ -28,92 +28,25 @@ class Router {
     this.options = { ...options };
     this.routes = new RoutesManager();
     this._globalMiddlewares = [];
+    this._nestedInHandlers = [];
     this.setErrorHandlers(this.errorHandlers, options.errorHandlers);
-  }
-
-  /**
-   * Starts routing with given options
-   * @param {startOptions} options
-   * @returns {Router} Router instance
-   * @memberof Router
-   */
-  start(options) {
-    if (typeof options != 'object') {
-      options = {};
-    }
-
-    this._ensureStarted(true);
-    config.isStarted = true;
-
-    if (options.errorHandlers) {
-      //applying errorHandlers if any
-      this.setErrorHandlers(
-        options.replaceErrorHandlers,
-        options.errorHandlers
-      );
-    }
-
-    if (options.useHashes != null) {
-      //update routing useHashes flag
-      config.useHashes = options.useHashes === true;
-    }
-
-    let navigateOptions = Object.assign({}, options, { pushState: false });
-    if (options.trigger !== false) {
-      //triggering middlewares only if trigger is not disallowed.
-      this.navigate(navigateOptions);
-    }
-    this._setOnPopstate(navigateOptions);
-    return this;
-  }
-
-  /**
-   * Sets onpopstate handler to reflect on history go forward/back.
-   * @private
-   * @memberof Router
-   */
-  _setOnPopstate() {
-    this._onPopstate = event => {
-      if (event == null || typeof event != 'object') {
-        event = {};
-      }
-      let state = event.state != null ? event.state : {};
-      let options = state.navigateOptions || { trigger: true };
-      options.pushState = false;
-      options.state = state;
-      return this.navigate(options);
-    };
-    window.addEventListener('popstate', this._onPopstate);
-  }
-
-  /**
-   * removes onpopstate handler
-   * @private
-   * @memberof Router
-   */
-  _removeOnPopstate() {
-    if (typeof this._onPopstate == 'function') {
-      window.removeEventListener('popstate', this._onPopstate);
-      delete this._onPopstate;
-    }
-  }
-  /**
-   * Stops routing
-   * @returns {Router}
-   * @memberof Router
-   */
-  stop() {
-    config.isStarted = false;
-    this._removeOnPopstate();
-    return this;
   }
 
   /**
    * Returns routing state. True if started
    * @return {boolean}
    */
-  isStarted() {
+  isRoutingStarted() {
     return config.isStarted === true;
+  }
+
+  /**
+   * Returns `true` if router is registered as subrouter
+   * @returns {boolean}
+   * @memberof Router
+   */
+  isNested() {
+    return this._nestedInHandlers.length > 0;
   }
 
   /**
@@ -129,12 +62,16 @@ class Router {
       middleware = path;
       path = null;
     }
-    if (typeof middleware !== 'function') {
+    if (
+      typeof middleware !== 'function' &&
+      !(middleware instanceof config.Router)
+    ) {
       return this;
     }
 
     if (path) {
-      this.add(path, [middleware], true);
+      let arg = middleware instanceof config.Router ? middleware : [middleware];
+      this.add(path, arg, true);
     } else {
       this._addGlobalMiddleware(middleware);
     }
@@ -167,8 +104,20 @@ class Router {
     if (path == null) {
       return;
     }
-    let routeHandler = this._ensureRouteHanlder(path);
-    routeHandler.addMiddlewares(middlewares, unshift);
+
+    let router = middlewares instanceof config.Router ? middlewares : null;
+
+    let routeHandler = this._ensureRouteHanlder(path, router);
+    if (!routeHandler.isRouter()) {
+      if (router) {
+        throw new Error(
+          'This routeHandler already initialized as regular and does not support adding a Router'
+        );
+      }
+      routeHandler.addMiddlewares(middlewares, unshift);
+    } else if (router) {
+      routeHandler.setRouter(router);
+    }
     return routeHandler;
   }
 
@@ -214,10 +163,13 @@ class Router {
    * @returns {RouteHandler}
    * @memberof Router
    */
-  _ensureRouteHanlder(path) {
+  _ensureRouteHanlder(path, router) {
     let routeHandler = this.routes.get(path);
     if (!routeHandler) {
-      routeHandler = new config.RouteHandler(path);
+      routeHandler = new config.RouteHandler(
+        path,
+        router instanceof config.Router ? router : null
+      );
       this.routes.add(routeHandler);
     }
     return routeHandler;
@@ -271,50 +223,95 @@ class Router {
     let req = this.createRequestContext(url, options);
     let res = this.createResponseContext(req);
 
-    let routeHandler = this.findRouteHandler(req);
-    if (routeHandler) {
-      try {
-        await routeHandler.processRequest(req, res, {
-          globalMiddlewares: [...this._globalMiddlewares]
-        });
-      } catch (exc) {
-        res.setError(exc);
-      }
-
-      if (res.error) {
-        this.handleError(res.error, req, res);
-      }
-    } else {
+    let context = this.findRequestRouteHandlerContext(req);
+    if (!context) {
       this.handleError('notfound', req, res);
+      return;
     }
+
+    let { handler, path, globalMiddlewares } = context;
+    let processOptions = Object.assign({ path, globalMiddlewares }, options);
+    let result;
+    try {
+      result = await handler.processRequest(req, res, processOptions);
+    } catch (ex) {
+      res.setError(ex);
+    }
+    if (res.error) {
+      this.handleError(res.error, req, res);
+    }
+    return result;
   }
 
   /**
-   * Finds routehandler by requestContext.
-   * Can also be used to find routehandler by path
-   * @param {(string|RequestContext)} req
-   * @returns RouteHandler instance
+   * Builds routeContexts array for further processing.
+   * Used internaly in processing request
+   * @private
+   * @param {*} [routeContext={}]
+   * @returns {routeContex[]}
    * @memberof Router
    */
-  findRouteHandler(req) {
-    req = this._getReq(req);
-    for (let routeHandler of this.routes.items) {
-      if (this.testRouteHandler(req, routeHandler)) {
-        return routeHandler;
-      }
+  getRouteContexts(routeContext = {}) {
+    let {
+      globalMiddlewares = [],
+      segments = [],
+      _circular = [] // for preventing curcular router nesting.
+    } = routeContext;
+
+    if (_circular.indexOf(this) > 1) {
+      throw new Error('Circular router nesting detected');
+    } else {
+      _circular.push(this);
     }
+
+    return this.routes.items.reduce((allcontexts, handler) => {
+      let result = handler.getRouteContexts({
+        globalMiddlewares: [...globalMiddlewares, ...this._globalMiddlewares],
+        segments,
+        _circular
+      });
+      allcontexts.push(...result);
+      return allcontexts;
+    }, []);
   }
 
   /**
-   * Tests RouteHandler instance against requestContext or path string
+   * Finds routeContext for a request by given requestContext.
+   * @private
+   * @param {(string|RequestContext)} req
+   * @returns {(void | routeContext)}
+   * @memberof Router
+   */
+  findRequestRouteHandlerContext(req, routeContext = {}) {
+    req = this._getReq(req);
+
+    let allcontexts = this.getRouteContexts(routeContext);
+
+    // sorting to match in a correct order
+    let possibleContexts = allcontexts.sort((a, b) =>
+      comparator([b, a, x => x.path.requiredStatic], [a, b, x => x.path.total])
+    );
+
+    for (let context of possibleContexts) {
+      if (this.testRouteHandlerContext(req, context)) {
+        return context;
+      }
+    }
+
+    return;
+  }
+
+  /**
+   * Tests routeContext against requestContext or path string
+   * @private
    * @param {(string|RequestContext)} req path or requestContext
    * @param {RouteHandler} routeHandler
    * @returns {boolean} true if request path match routeHandler path
    * @memberof Router
    */
-  testRouteHandler(req, routeHandler) {
-    req = this._getReq(req);
-    return routeHandler.testRequest(req);
+  testRouteHandlerContext(req, context) {
+    let res = context.path.testPath(req.path);
+    return res;
   }
 
   /**
@@ -395,6 +392,7 @@ class Router {
    * @memberof Router
    */
   navigate(url, options = {}) {
+    this._ensureNotNested();
     this._ensureStarted();
     if (typeof url === 'object') {
       options = url;
@@ -429,7 +427,7 @@ class Router {
    */
   isCurrentUrl(url) {
     url = this._getUrl(url);
-    return this._currentUrl == url.toString().toLowerCase();
+    return config._currentUrl == url.toString().toLowerCase();
   }
 
   /**
@@ -439,8 +437,12 @@ class Router {
    * @memberof Router
    */
   setCurrentUrl(url) {
-    url = this._getUrl(url);
-    this._currentUrl = url.toString().toLowerCase();
+    if (url == null) {
+      config._currentUrl = null;
+    } else {
+      url = this._getUrl(url);
+      config._currentUrl = url.toString().toLowerCase();
+    }
   }
 
   /**
@@ -481,10 +483,16 @@ class Router {
    */
   _ensureStarted(value = false) {
     let message = value ? 'already' : 'not yet';
-    if (this.isStarted() === value) {
+    if (this.isRoutingStarted() === value) {
       throw new Error(`Router ${message} started`);
     }
     return this;
+  }
+
+  _ensureNotNested(message) {
+    if (this.isNested()) {
+      throw new Error('Nested router ' + (message || ''));
+    }
   }
 
   /**
@@ -512,6 +520,26 @@ class Router {
     }
     return this.createRequestContext(arg);
   }
+  /**
+   * unregisters junction between routeHandler and router
+   * @private
+   * @param {RouteHandler} routeHandler
+   */
+  _releaseHandler(routeHandler) {
+    let index = this._nestedInHandlers.indexOf(routeHandler);
+    if (index > -1) {
+      this._nestedInHandlers.splice(index, 1);
+    }
+  }
+  /**
+   * registers junction between routeHandler and router
+   * @private
+   * @param {RouteHandler} routeHandler
+   */
+  _holdHandler(routeHandler) {
+    this._nestedInHandlers.push(routeHandler);
+  }
+
   //#endregion
 }
 

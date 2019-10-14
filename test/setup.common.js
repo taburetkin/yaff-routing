@@ -43,9 +43,14 @@ global.history = {
 };
 
 beforeEach(function() {
+  global.document.location.href = global.baseUrl.href;
   this.sinon = global.sinon.createSandbox();
+  routing.config.isStarted = false;
+  global.history.states = [{ url: global.baseUrl.toString() }];
 });
 
 afterEach(function() {
   this.sinon.restore();
+  routing.stop();
+  delete routing.instance;
 });
