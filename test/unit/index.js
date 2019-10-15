@@ -90,6 +90,12 @@ describe('general routing', function() {
         let instance = routing.createRouter();
         expect(instance).to.be.instanceof(config.Router);
       });
+      it('should create Router with provided options', function() {
+        let spy = this.sinon.spy(routing.config, 'Router');
+        let options = { foo: 'bar' };
+        routing.createRouter(options);
+        expect(spy).to.be.calledOnce.and.calledWith(options);
+      });
     });
     describe('when used custom Router', function() {
       class Router extends DefaultRouter {}

@@ -4,6 +4,7 @@ const fs = require('fs');
   let content = await jsdoc2md.render({
     files: [
       'index.js',
+      'routing.js',
       'config.js',
       'Router.js',
       'RouteHandler.js',

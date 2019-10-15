@@ -49,6 +49,97 @@ You can provide your own versions of internal classes and setup some behavior.</
 ## routing
 This is main module.By Default its only the thing you should use working with fe-routing-js
 
+
+* [routing](#module_routing)
+    * [.config](#module_routing.config)
+    * [.createRouter([options])](#module_routing.createRouter) ⇒ [<code>Router</code>](#Router)
+    * [.get()](#module_routing.get) ⇒ [<code>Router</code>](#Router)
+    * [.use()](#module_routing.use) ⇒ [<code>Router</code>](#Router)
+    * [.start([options])](#module_routing.start) ⇒ [<code>Router</code>](#Router)
+    * [.stop()](#module_routing.stop) ⇒ [<code>Router</code>](#Router)
+    * [.remove()](#module_routing.remove) ⇒ [<code>RouteHandler</code>](#RouteHandler) \| <code>void</code>
+    * [.navigate()](#module_routing.navigate)
+    * [.isStarted()](#module_routing.isStarted) ⇒ <code>boolean</code>
+
+<a name="module_routing.config"></a>
+
+### routing.config
+routing Configuration
+
+**Kind**: static property of [<code>routing</code>](#module_routing)  
+**See**: [configuration](#configuration)  
+<a name="module_routing.createRouter"></a>
+
+### routing.createRouter([options]) ⇒ [<code>Router</code>](#Router)
+Creates instance of Router with config.routingOptions.
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
+**Returns**: [<code>Router</code>](#Router) - Router instance  
+
+| Param | Type |
+| --- | --- |
+| [options] | [<code>routingOptions</code>](#routingOptions) | 
+
+<a name="module_routing.get"></a>
+
+### routing.get() ⇒ [<code>Router</code>](#Router)
+Registers routeHandler.Alias for `routing.instance.get`.
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
+**See**: [Router.get](Router.get)  
+**Example**  
+```js
+routing.get('some/page', (req, res) => { ... })
+```
+<a name="module_routing.use"></a>
+
+### routing.use() ⇒ [<code>Router</code>](#Router)
+Adds global middleware, router or route middleware.Alias for `routing.instance.use`.
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
+**See**: [Router.use](Router.use)  
+**Example**  
+```js
+// adding global middleware to the end of arrayrouting.use((req, res, next) => { next(); });// adding nested routerrouting.use('acc', accountRouter);// adding route middleware to the begining of route's middlewares arrayrouting.use('some/page', (req, res, next) => { next(); });
+```
+<a name="module_routing.start"></a>
+
+### routing.start([options]) ⇒ [<code>Router</code>](#Router)
+Starts routing
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
+
+| Param | Type |
+| --- | --- |
+| [options] | [<code>startOptions</code>](#startOptions) | 
+
+<a name="module_routing.stop"></a>
+
+### routing.stop() ⇒ [<code>Router</code>](#Router)
+Stops routing
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
+**See**: [Router.stop](Router.stop)  
+<a name="module_routing.remove"></a>
+
+### routing.remove() ⇒ [<code>RouteHandler</code>](#RouteHandler) \| <code>void</code>
+Removes middleware or routeHandler.Alias for `routing.instance.remove`.
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
+**See**: [Router.remove](Router.remove)  
+<a name="module_routing.navigate"></a>
+
+### routing.navigate()
+Initiates the request.Proxy method for Router instance's `navigate`.
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
+**See**: [Router.navigate](Router.navigate)  
+<a name="module_routing.isStarted"></a>
+
+### routing.isStarted() ⇒ <code>boolean</code>
+Returns routing state. True if started
+
+**Kind**: static method of [<code>routing</code>](#module_routing)  
 <a name="Router"></a>
 
 ## Router
