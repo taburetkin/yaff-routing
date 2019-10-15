@@ -1,4 +1,4 @@
-# @yaff/routing (pre release)
+# yaff-routing (pre release)
 
 Simple frontend routing with pretty similar to nodejs express API.
 
@@ -39,7 +39,7 @@ At this point there are only two methods to define route handlers: `get` and `us
 ### Simple use case:
 
 ```javascript
-import { routing } from '@yaff/routing';
+import { routing } from 'yaff-routing';
 
 //define middleware for root page http://localhost
 routing.get('', () => {
@@ -94,7 +94,7 @@ config.RequestContext = MyRequestContext;
 As in nodejs express routing you can setup multiple middlewares for each route, they will be executed in order.
 
 ```javascript
-import { routing } from '@yaff/routing';
+import { routing } from 'yaff-routing';
 
 routing.get(
   'some/deep/route',
@@ -118,7 +118,7 @@ routing.get(
 Next example illustrates one of possible ways of using middlewares chain:
 
 ```javascript
-import { routing } from '@yaff/routing';
+import { routing } from 'yaff-routing';
 
 function validate(req, res, next) {
   let articleId = parseInt(req.args.id, 10);
@@ -184,7 +184,7 @@ const middleware = (req, res, next) => {
 Sometimes you have to define common middleware for all your routes
 
 ```javascript
-import { routing } from '@yaff/routing';
+import { routing } from 'yaff-routing';
 
 //this middleware will be executed on each route
 function logger(req) {
@@ -317,7 +317,7 @@ routing.use('somepage', routeHandler3);
 You can organize your entry points with multiple routers.
 
 ```javascript
-import { routing, Router } from '@yaff/routing';
+import { routing, Router } from 'yaff-routing';
 
 const account = new Router();
 
@@ -344,7 +344,7 @@ Each router can hold another routers as deep as you need.
 There is only one limitation - you can not set up circular routes like this
 
 ```javascript
-import { routing, Router } from '@yaff/routing';
+import { routing, Router } from 'yaff-routing';
 
 const foo = new Router();
 const bar = new Router();

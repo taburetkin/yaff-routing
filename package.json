@@ -1,5 +1,5 @@
 {
-	"name": "@yaff/routing",
+	"name": "yaff-routing",
 	"version": "1.0.0",
 	"description": "javascript front-end routing pack",
 	"main": "index.js",
