@@ -14,6 +14,28 @@ Btw, there is a special packed `es5 umd` and `esm` versions in the `lib` folder 
 > **NOTE!**  
 > This package internally uses `URL`, `addEventListener`, window's `popstate` event and `history.pushState`, so if you are going to use it with **IE11** you have to provide polifylls for that. I've tested it with `core-js` and `jquery` and it seems that its enough for using in old browsers.
 
+### Ideology
+
+1. you should define your app's entry points.
+
+```javascript
+routing.get('my/some/page', (req, res) => {});
+```
+
+2. start routing
+
+```javascript
+routing.start();
+```
+
+3. use `routing.navigate` when you have to invoke route middlewares and the history backward and forward will be handled automaticaly.
+
+```javascript
+routing.navigate('my/some/page');
+```
+
+At this point there are only two methods to define route handlers: `get` and `use`, so those are not awailable: `put`, `post`, `patch`, `delete`, etc.
+
 ### Simple use case:
 
 ```javascript
@@ -49,6 +71,22 @@ You can define route handlers at any time during application lifecycle, but you 
 
 ```javascript
 routing.start();
+```
+
+### Configuration
+
+So, if you are going to use it as stand alone library, then all you have to do is just use `routing`. It includes `config` - the configuration namesace and it in turn holds all necessary definitions:  
+`let router = new routing.config.Router();` - see full reference for details
+
+You can extend any class with your own, but don't forget to put it in config if you want your new classes will be used by default:
+
+```javascript
+class MyRouter extends Router { ... }
+config.Router = MyRouter;
+
+class MyRequestContext extends RequestContext { ... }
+config.RequestContext = MyRequestContext;
+
 ```
 
 ### Middlewares chain
@@ -127,7 +165,7 @@ routing.start({
 
 ```
 
-#### request processing
+#### Request processing
 
 In the middle of middlewares chain you have to call `next()` to invoke next middleware.
 
@@ -160,9 +198,9 @@ routing.use(logger);
 
 Sometimes you have to setup an error during processing the request.  
 By default there is no any handlers and you have to define it by your own.  
-In case there is no routeHandler for precessing request the `notfound` handler will be invoked.
-In case the `response.error` is instance of `Error` then `exception` handler will be invoked.  
-In case there is no error handler found then `default` handler will be invoked.
+In case there is no routeHandler for processing request there will be a try to invoke `notfound` handler.
+In case the `response.error` is instance of `Error` then there will be a try to invoke `exception`.  
+In case there is no error handler found then there will be a try to invoke `default` handler.
 
 ```javascript
 routing.use((req, res, next) => {
@@ -208,6 +246,12 @@ routing.start({
   }
 });
 ```
+
+You can provide `errorHandlers` at the start time, then will be invoked `routing.instance.setErrorHandlers` with "merge" behavior.
+Also, you can call `setErrorHandlers` on main router at any time.
+
+> **NOTE**  
+> ErrorHandlers in nested routers not used
 
 ### Understanding route middlewares order
 
@@ -266,6 +310,64 @@ routing.remove('somepage', routeHandler3);
 routing.use('somepage', routeHandler3);
 // execution order for /somepage is
 // handler1 -> handler3 -> routeHandler3 -> routeHandler1 -> routeHandler2
+```
+
+### Nesting routers
+
+You can organize your entry points with multiple routers.
+
+```javascript
+import { routing, Router } from '@yaff/routing';
+
+const account = new Router();
+
+// configuring login page
+account.get('login', (req, res) => { ... });
+// configuring registration page
+account.get('registration', (req, res) => { ... });
+
+const articles = new Router();
+
+// configuring articles list page
+articles.get('', (req, res) => { ... });
+// configuring article page
+articles.get(':id', (req, res) => { ... });
+
+routing.use('acc', account);
+routing.use('articles', articles);
+
+routing.start();
+
+```
+
+Each router can hold another routers as deep as you need.  
+There is only one limitation - you can not set up circular routes like this
+
+```javascript
+import { routing, Router } from '@yaff/routing';
+
+const foo = new Router();
+const bar = new Router();
+
+bar.use('foo', foo);
+foo.use('bar', bar);
+
+// this will throw circular error at the later time.
+```
+
+### Request arguments
+
+Its possible to specify routes with dynamic segments which will be the request arguments at the processing time and will be placed in `req.args`:
+
+```javascript
+routing.get('articles/:category/:subcategory', (req, res) => {
+  console.log(req.args.category, req.args.subcategory);
+});
+
+routing.start();
+routing.navigate('articles/cats/funy');
+
+//console: cats funy
 ```
 
 [Take a look on detailed reference](https://github.com/taburetkin/yaff-routing/blob/master/reference.md)

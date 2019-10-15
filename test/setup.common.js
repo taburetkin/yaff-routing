@@ -51,6 +51,7 @@ beforeEach(function() {
 
 afterEach(function() {
   this.sinon.restore();
+  sinon.restore();
   routing.stop();
   delete routing.instance;
 });

@@ -9,12 +9,14 @@ config.RouteHandler = RouteHandler;
 config.RequestContext = RequestContext;
 config.ResponseContext = ResponseContext;
 
+export { config, Router, RouteHandler, RequestContext, ResponseContext };
+
 /**
  * This is main module.
  * By Default its only the thing you should use working with fe-routing-js
  * @module routing
  */
-export default {
+export const routing = {
   /**
    * Returns current routing instance. If it does not exist instance will be created.
    * @private

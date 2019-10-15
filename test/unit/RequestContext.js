@@ -1,4 +1,3 @@
-import routing from '../..';
 const config = routing.config;
 const RequestContext = config.RequestContext;
 describe('RequestContext', function() {

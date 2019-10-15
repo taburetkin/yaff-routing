@@ -122,37 +122,80 @@ class Router {
   }
 
   /**
+   * Returns registered routeHandler
+   *
+   * @param {string} path
+   * @param {boolean} traverse if True will look up in nested routers too. default is true
+   * @returns {(RouteHandler|Void)}
+   * @memberof Router
+   */
+  getRouteHandler(path, traverse = true) {
+    let result = this.routes.get(path);
+    if ((!result && traverse !== false) || (result && traverse === true)) {
+      let context = this.findRouteHandlerContext(path);
+      result = context && context.handler;
+    }
+    return result;
+  }
+  /**
    * Removes registered routeHandler if path param is a string and middleware param is undefined.
    * Removes registered routehandler's middleware if path param is a string and middleware param is a function
    * Removes global middleware if path param is a function
    * @param {(string|function)} path
-   * @param {function} middleware
+   * @param {function} [middleware]
+   * @param {boolean} [traverse=true] Indicates should look up beeing applied to the nested routers, default is true
    * @returns {(function|void)} removed middleware
    * @memberof Router
    */
-  remove(path, middleware) {
+  remove(path, middleware, traverse) {
     if (typeof path === 'function') {
       middleware = path;
       path = null;
     }
-    let routeHandler = this.routes.get(path);
-
+    if (typeof middleware == 'boolean') {
+      traverse = middleware;
+      middleware = null;
+    }
     /** removing global middleware */
-    if (!routeHandler && middleware) {
+    if (path == null && typeof middleware == 'function') {
       this._removeGlobalMiddleware(middleware);
       return;
+    }
+
+    let router = this;
+    let routeHandler = this.getRouteHandler(path, false);
+    let shouldTraverseAnyway =
+      (traverse === true && !middleware) || (traverse !== false && middleware);
+    if (
+      (!routeHandler && traverse !== false) ||
+      (routeHandler && shouldTraverseAnyway)
+    ) {
+      let context = this.findRouteHandlerContext(path);
+      path;
+      if (context) {
+        router = context.router;
+        routeHandler = context.handler;
+      }
     }
 
     if (routeHandler) {
       if (!middleware) {
         /** removing routeHandler */
-        this.routes.remove(routeHandler);
+        router._removeRouteHandler(routeHandler);
       } else {
         /** removing routeHandler's middleware */
-        routeHandler.removeMiddleware(middleware);
+        if (routeHandler.isRouter()) {
+          routeHandler.router.remove(middleware);
+        } else {
+          routeHandler.removeMiddleware(middleware);
+        }
       }
       return routeHandler;
     }
+  }
+
+  _removeRouteHandler(handler) {
+    this.routes.remove(handler);
   }
 
   /**
@@ -183,6 +226,16 @@ class Router {
     this._globalMiddlewares.push(middleware);
   }
 
+  /**
+   * Returns true if provided middleware is in globalMiddleares array
+   *
+   * @param {function} middleware
+   * @returns {boolean}
+   * @memberof Router
+   */
+  hasMiddleware(middleware) {
+    return this._globalMiddlewares.indexOf(middleware) > -1;
+  }
   //#endregion
 
   //#region process request section
@@ -223,7 +276,7 @@ class Router {
     let req = this.createRequestContext(url, options);
     let res = this.createResponseContext(req);
 
-    let context = this.findRequestRouteHandlerContext(req);
+    let context = this.findRouteHandlerContext(req);
     if (!context) {
       this.handleError('notfound', req, res);
       return;
@@ -268,7 +321,8 @@ class Router {
       let result = handler.getRouteContexts({
         globalMiddlewares: [...globalMiddlewares, ...this._globalMiddlewares],
         segments,
-        _circular
+        _circular,
+        router: this
       });
       allcontexts.push(...result);
       return allcontexts;
@@ -276,13 +330,13 @@ class Router {
   }
 
   /**
-   * Finds routeContext for a request by given requestContext.
+   * Finds routeContext for a request by given requestContext or path.
    * @private
    * @param {(string|RequestContext)} req
    * @returns {(void | routeContext)}
    * @memberof Router
    */
-  findRequestRouteHandlerContext(req, routeContext = {}) {
+  findRouteHandlerContext(req, routeContext = {}) {
     req = this._getReq(req);
 
     let allcontexts = this.getRouteContexts(routeContext);

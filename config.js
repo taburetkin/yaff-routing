@@ -13,16 +13,16 @@ const config = {
   /** use hashes instead of urls */
   useHashes: false,
 
-  /** @type {Routing} - Routing definition will be used internally by routing. Replace it with your extended version if you need  */
-  Routing: void 0,
+  /** @type {Router} - Router class will be used internally by routing. Replace it with your extended version if you need  */
+  Router: void 0,
 
-  /** @type {RouteHandler} - RouteHandler definition will be used internally by routing. Replace it with your extended version if you need  */
+  /** @type {RouteHandler} - RouteHandler class will be used internally by routing. Replace it with your extended version if you need  */
   RouteHandler: void 0,
 
-  /** @type {RequestContext} - RequestContext definition will be used internally by routing. Replace it with your extended version if you need  */
+  /** @type {RequestContext} - RequestContext class will be used internally by routing. Replace it with your extended version if you need  */
   RequestContext: void 0,
 
-  /** @type {ResponseContext} - RequestContext definition will be used internally by routing. Replace it with your extended version if you need  */
+  /** @type {ResponseContext} - RequestContext class will be used internally by routing. Replace it with your extended version if you need  */
   ResponseContext: void 0,
 
   /**

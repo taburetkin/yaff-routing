@@ -1,5 +1,7 @@
-import RouteHandler from '../../RouteHandler';
 import Manager from '../../RoutesManager';
+import config from '../../config';
+Object.assign(config, routing.config);
+const RouteHandler = routing.config.RouteHandler;
 
 const size = mng => {
   let t = { len: mng.items.length, keys: Object.keys(mng.byPath).length };

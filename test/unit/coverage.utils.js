@@ -1,6 +1,7 @@
+import config from '../../config';
 import { url, buildSegments, compare } from '../../utils';
-import routing from '../..';
-import PathContext from '../../PathContext';
+Object.assign(config, routing.config);
+
 describe('url', function() {
   const paths = {
     '': '',
@@ -12,6 +13,7 @@ describe('url', function() {
   };
   afterEach(function() {
     routing.config.useHashes = false;
+    config.useHashes = false;
   });
   it('when useHashes is true should pass all doubled path without prefix', function() {
     let prefix = '';
@@ -27,6 +29,7 @@ describe('url', function() {
   it('when useHashes is true should pass all doubled path with `/#` prefix', function() {
     let prefix = '/#';
     routing.config.useHashes = true;
+    config.useHashes = true;
     Object.keys(paths).forEach(passedUrl => {
       let outputUrl = paths[passedUrl] + paths[passedUrl];
       if (outputUrl === '') {

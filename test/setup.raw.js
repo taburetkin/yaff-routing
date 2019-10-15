@@ -1,3 +1,3 @@
-require("./setup.common");
-const routing = require("../index").default;
+require('./setup.common');
+const { routing } = require('../index');
 global.routing = routing;

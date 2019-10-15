@@ -108,7 +108,7 @@ class RouteHandler {
   }
 
   getRouteContexts(parentContext) {
-    let { globalMiddlewares, segments, _circular } = parentContext;
+    let { globalMiddlewares, segments, _circular, router } = parentContext;
 
     if (this.isRouter()) {
       return this.router.getRouteContexts({
@@ -121,7 +121,8 @@ class RouteHandler {
         globalMiddlewares,
         segments,
         handler: this,
-        path: new PathContext([...segments, ...this._path.segments])
+        path: new PathContext([...segments, ...this._path.segments]),
+        router
       };
       //console.log('> cntx', context.path.segments.map(m => m.value));
       return [context];

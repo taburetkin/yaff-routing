@@ -1,6 +1,5 @@
-import routing from '../..';
-import { buildSegments } from '../../utils';
-import PathContext from '../../PathContext';
+// import { buildSegments } from '../../utils';
+// import PathContext from '../../PathContext';
 const config = routing.config;
 const DefaultRouter = config.Router;
 const DefaultRouteHandler = config.RouteHandler;
@@ -143,6 +142,63 @@ describe('Router', function() {
       expect(handler1).to.be.equal(handler2);
     });
   });
+  describe('getRouteHanlder', function() {
+    let router;
+    let mw;
+    beforeEach(function() {
+      mw = () => {};
+      router = new config.Router();
+      routing.use(router);
+    });
+    it('should return handler if handler exists', function() {
+      router.get('foo/bar/exist', mw);
+      let handler = router.getRouteHandler('foo/bar/exist');
+      expect(handler).to.be.instanceOf(config.RouteHandler);
+      expect(handler.hasMiddleware(mw)).to.be.true;
+    });
+    it('should return undefined if there is no handler with thap path', function() {
+      let handler = router.getRouteHandler('foo/bar/exist');
+      expect(handler).to.be.undefined;
+    });
+    describe('when nested routers exist', function() {
+      let barInFoo;
+      let barInAntiFoo;
+      let mw2;
+      beforeEach(function() {
+        mw = () => {};
+        mw2 = () => {};
+        let foo = new config.Router();
+        let antifoo = new config.Router();
+        barInFoo = new config.Router();
+        barInAntiFoo = new config.Router();
+
+        foo.use('bar', barInFoo);
+        antifoo.use('bar', barInAntiFoo);
+
+        router = new config.Router();
+
+        routing.use(router);
+        routing.use('foo', foo);
+        routing.use(':antifoo', antifoo);
+      });
+      it('should lookup for correct nested routeHandler and return it', function() {
+        barInFoo.get('test', mw);
+        barInAntiFoo.get('test', mw2);
+        let handler = router.getRouteHandler('foo/bar/test');
+        expect(handler).to.be.instanceOf(config.RouteHandler);
+        expect(handler.hasMiddleware(mw)).to.be.true;
+
+        handler = router.getRouteHandler('something/bar/test');
+        expect(handler).to.be.instanceOf(config.RouteHandler);
+        expect(handler.hasMiddleware(mw2)).to.be.true;
+      });
+      it('should not lookup for nested routeHandler if called with traverse `false`', function() {
+        barInFoo.get('test', mw);
+        let handler = router.getRouteHandler('foo/bar/test', false);
+        expect(handler).to.be.undefined;
+      });
+    });
+  });
   describe('remove', function() {
     it('should remove global handler', function() {
       instance.use(handler2);
@@ -175,6 +231,114 @@ describe('Router', function() {
     it('should return undefined if no routeHandler founded', function() {
       let handler = instance.remove('some-path');
       expect(handler).to.be.undefined;
+    });
+    describe('when using with nested routers', function() {
+      let foo;
+      let mw1;
+      let mw2;
+      beforeEach(function() {
+        mw1 = () => {};
+        mw2 = () => {};
+        foo = new config.Router();
+        foo.get('test', mw1);
+        instance.use('foo', foo);
+      });
+      it("should remove nested routeHandler's middleware", function() {
+        let handler = routing.remove('foo/test', mw1);
+        expect(handler).to.be.instanceOf(config.RouteHandler);
+        handler = instance.getRouteHandler('foo/test');
+        expect(handler.hasMiddleware(mw1)).to.be.false;
+      });
+      it("should not remove nested routeHandler's middleware if traverse is false", function() {
+        let handler = routing.remove('foo/test', mw1, false);
+        expect(handler).to.be.undefined;
+        handler = instance.getRouteHandler('foo/test');
+        expect(handler.hasMiddleware(mw1)).to.be.true;
+      });
+      it('should remove nested routeHandler by path', function() {
+        let handler = routing.remove('foo/test');
+        expect(handler).to.be.instanceOf(config.RouteHandler);
+        expect(handler.hasMiddleware(mw1)).to.be.true;
+        expect(instance.getRouteHandler('foo/test')).to.be.undefined;
+      });
+      it('should not remove nested routeHandler by path if traverse is false', function() {
+        let handler = routing.remove('foo/test', null, false);
+        expect(handler).to.be.undefined;
+        expect(instance.getRouteHandler('foo/test')).to.be.instanceOf(
+          config.RouteHandler
+        );
+      });
+
+      it('should not remove router routeHandler if traverse is explicitly true', function() {
+        foo.get('', mw2);
+        routing.remove('foo', true);
+        let handler = instance.getRouteHandler('foo', false);
+        expect(handler).to.be.instanceOf(config.RouteHandler);
+      });
+
+      it('should remove router routeHandler if traverse is explicitly false', function() {
+        foo.get('', mw2);
+        routing.remove('foo', false);
+        let handler = instance.getRouteHandler('foo', false);
+        expect(handler).to.be.undefined;
+      });
+
+      it('should remove router routeHandler if traverse is not set', function() {
+        foo.get('', mw2);
+        routing.remove('foo');
+        let handler = instance.getRouteHandler('foo', false);
+        expect(handler).to.be.undefined;
+      });
+
+      it('should remove nested router routeHandler root middleware if traverse explicitly true', function() {
+        foo.get('', mw2);
+        let handler = routing.remove('foo', mw2, true);
+        let root = instance.getRouteHandler('foo', false);
+        expect(handler).to.be.instanceOf(config.RouteHandler);
+        expect(root).to.be.instanceOf(config.RouteHandler);
+        expect(handler).to.not.be.equal(root);
+        expect(handler.path).to.be.equal('/');
+        expect(handler.hasMiddleware(mw2)).to.be.false;
+      });
+      it('should remove nested router routeHandler root middleware if traverse is not set', function() {
+        foo.get('', mw2);
+        let handler = routing.remove('foo', mw2);
+        let root = instance.getRouteHandler('foo', false);
+        expect(handler).to.be.instanceOf(config.RouteHandler);
+        expect(root).to.be.instanceOf(config.RouteHandler);
+        expect(handler).to.not.be.equal(root);
+        expect(handler.path).to.be.equal('/');
+        expect(handler.hasMiddleware(mw2)).to.be.false;
+      });
+      it('should not remove nested router routeHandler root middleware if traverse is set to false', function() {
+        foo.get('', mw2);
+        let handler = routing.remove('foo', mw2, false);
+        let root = instance.getRouteHandler('foo', false);
+        expect(handler, 'handler instance').to.be.instanceOf(
+          config.RouteHandler
+        );
+        expect(root, 'root instance').to.be.instanceOf(config.RouteHandler);
+        expect(handler, 'handler is root').to.be.equal(root);
+        handler = instance.getRouteHandler('foo', true);
+        expect(handler, 'handler is not root').to.be.not.equal(root);
+        expect(handler.hasMiddleware(mw2), 'handler middleware').to.be.true;
+      });
+      it('should remove nested router global middleware  if traverse is set to false', function() {
+        foo.get('', mw2);
+        foo.use(mw2);
+        instance.use(mw2);
+
+        expect(foo.hasMiddleware(mw2)).to.be.true;
+
+        routing.remove('foo', mw2, false);
+        let handler = instance.getRouteHandler('foo', true);
+        expect(handler.isRouter()).to.be.false;
+        expect(handler.path).to.be.equal('/');
+        expect(handler.hasMiddleware(mw2)).to.be.true;
+        expect(instance.hasMiddleware(mw2)).to.be.true;
+
+        expect(foo.hasMiddleware(mw2)).to.be.false;
+      });
     });
   });
   describe('createRequestContext', function() {
@@ -355,7 +519,8 @@ describe('Router', function() {
   describe('navigate', function() {
     let instance;
     beforeEach(function() {
-      instance = routing.instance = new config.Router();
+      instance = new config.Router();
+      routing.use(instance);
       routing.start({ trigger: false });
     });
     afterEach(function() {
@@ -539,9 +704,12 @@ describe('Router', function() {
       });
 
       it('static routes should have priority over parametrized', async function() {
+        let routes = routing.instance.routes.items;
+
         keyedInc('foo/:bar');
         keyedInc('foo/bar');
 
+        expect(routes[routes.length - 1].path).to.be.equal('/foo/bar');
         await routing.navigate('foo/bar');
 
         expect(counters['foo/bar']).to.be.equal(1);
@@ -550,6 +718,16 @@ describe('Router', function() {
         await routing.navigate('foo/zoo');
 
         expect(counters['foo/bar']).to.be.equal(1);
+        expect(counters['foo/:bar']).to.be.equal(1);
+
+        routing.remove('foo/:bar');
+        keyedInc('foo/:bar');
+
+        expect(routes[routes.length - 1].path).to.be.equal('/foo/:bar');
+
+        await routing.navigate('foo/bar');
+
+        expect(counters['foo/bar']).to.be.equal(2);
         expect(counters['foo/:bar']).to.be.equal(1);
       });
       it('should choose correct handler', async function() {
@@ -629,30 +807,6 @@ describe('Router', function() {
         ).to.be.equal(5);
         expect(inc.callCount).to.be.equal(12);
       });
-      // it.only('trying to catch optional coverage', async function() {
-      //   keyedInc('bar/:action-:id(/baraban)');
-      //   await routing.navigate('bar/barbar-foofofo/baraban');
-      //   console.log(counters);
-      //   await routing.navigate('bar/barbar-foofofo');
-      //   console.log(counters);
-      //   let rh = routing.instance.routes.items[0];
-      //   let path = '/optional/capro(/id)';
-      //   let o = rh.regexPatterns;
-      //   let route = path
-      //     .replace(o.escapeRegExp, '\\$&')
-      //     .replace(o.optionalParam, '(?:$1)?')
-      //     .replace(o.namedParam, (match, optional) => {
-      //       console.log('YAY', optional, match);
-      //       return optional ? match : '([^/?]+)';
-      //     })
-      //     .replace(o.splatParam, '([^?]*?)');
-      //   console.log(route);
-      //   /*
-      //   keyedInc('optional/capro(/:id)');
-      //   //path = '/optional/capro(/:id)';
-
-      //   */
-      // });
     });
   });
   describe('hash based navigate', function() {
