@@ -1,6 +1,14 @@
-# yaff-routing (pre release)
+# yaff-routing v1.0.0
 
 Simple frontend routing with pretty similar to nodejs express API.
+
+## Install
+
+```javascript
+npm install yaff-routing
+// or
+yarn add yaff-routing
+```
 
 ## Reference
 
