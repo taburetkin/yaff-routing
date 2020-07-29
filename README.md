@@ -60,7 +60,7 @@ routing.get('articles', () => {
 });
 
 //define middleware for article page http://localhost/articles/[id]
-routing.get('articles/:id', req => {
+routing.get('articles/:id', (req) => {
   let articleId = req.args.id;
   console.log(`this is article page with id ${articleId}`);
 });
@@ -250,8 +250,8 @@ routing.start({
     },
     myOwnHandler() {
       // some custom error handler
-    }
-  }
+    },
+  },
 });
 ```
 
@@ -295,7 +295,8 @@ Route middlewares can be added in two ways
 `routing.use(route, middleware)` - adds middleware to the begining of route's array
 
 ```javascript
-// global middleware are defined in previous example
+// global middlewares are defined in previous example
+// as globalHandler1 and globalHandler3
 
 const routeHandler1 = (req, res, next) => next();
 const routeHandler2 = (req, res, next) => next();
@@ -303,21 +304,21 @@ const routeHandler3 = (req, res, next) => next();
 
 routing.get('somepage', routeHandler1, routeHandler2);
 // execution order for /somepage is
-// handler1 -> handler3 -> routeHandler1 -> routeHandler2
+// globalHandler1 -> globalHandler3 -> routeHandler1 -> routeHandler2
 
 routing.get('somepage', routeHandler3);
 // execution order for /somepage is
-// handler1 -> handler3 -> routeHandler1 -> routeHandler2 -> routeHandler3
+// globalHandler1 -> globalHandler3 -> routeHandler1 -> routeHandler2 -> routeHandler3
 
 routing.remove('somepage', routeHandler3);
 // execution order for /somepage is
-// handler1 -> handler3 -> routeHandler1 -> routeHandler2
+// globalHandler1 -> globalHandler3 -> routeHandler1 -> routeHandler2
 
 // Now lets add middleware before
 // for this we will use `routing.use` instead of `routing.get`
 routing.use('somepage', routeHandler3);
 // execution order for /somepage is
-// handler1 -> handler3 -> routeHandler3 -> routeHandler1 -> routeHandler2
+// globalHandler1 -> globalHandler3 -> routeHandler3 -> routeHandler1 -> routeHandler2
 ```
 
 ### Nesting routers

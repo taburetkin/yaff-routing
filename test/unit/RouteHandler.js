@@ -1,3 +1,5 @@
+import { delay } from '../tests-helpers';
+
 const config = routing.config;
 
 describe('RouteHandler', function() {
@@ -203,6 +205,35 @@ describe('RouteHandler', function() {
       routing.navigate('test');
       expect(h).to.be.eql(['global', 'one', 'two']);
     });
+
+    it('should invoke handlers in a correct order if handlers are async', async function() {
+      let hh = [];
+      let add = what => {
+        hh.push(what);
+      };
+      routing.get(
+        'test2',
+        async (r, s, n) => {
+          await delay(50);
+          add('one');
+          return n();
+        },
+        (r, s, n) => {
+          add('two');
+          return n();
+        },
+        async (r, s, n) => {
+          await delay(50);
+          add('three');
+          return n();
+        }
+      );
+      routing.use((r, s, n) => (hh.push('global'), n()));
+      await routing.navigate('test2');
+
+      expect(hh).to.be.eql(['global', 'one', 'two', 'three']);
+    });
+
     it('should be able to process if there is no options provided', function() {
       let handler = routing.instance.add('test/foo', [() => {}]);
       expect(handler).to.be.instanceOf(config.RouteHandler);
