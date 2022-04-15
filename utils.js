@@ -59,31 +59,31 @@ export function buildPath(url, useHashes) {
  * @param {string[]} chunks
  * @returns {string}
  */
-export function url(...chunks) {
-  if (!chunks || chunks.length == 0) {
-    chunks = [''];
-  }
+export function url(urlText = '') {
 
-  chunks = chunks.map(chunk => {
-    if (chunk == '' || chunk == null) {
-      return '';
+  let useHashes = config.useHashes;
+
+  if (urlText.length) {
+    // converts `#asd/qwe` to `asd/qwe`
+    if (urlText[0] === '#' && useHashes) {
+      urlText = urlText.substring(1);
     }
-    if (chunk[0] !== '/') {
-      chunk = '/' + chunk;
+
+    // converts `asd/qwe` to `/asd/qwe`
+    if (urlText[0] !== '/') {
+      urlText = '/' + urlText;
     }
-    return chunk;
-  });
 
-  if (chunks[0][0] !== '/') {
-    chunks[0] = '/' + chunks[0];
+  } else {
+    urlText = '/';
   }
 
-  if (config.useHashes) {
-    chunks[0] = '/#' + chunks[0];
-  }
+  // converts `/asd/qwe` to `/#/asd/qwe` if useHashes is true
+  let res = useHashes ? '/#' + urlText : urlText;
+  return res;
 
-  return chunks.join('');
 }
+
 
 export function addValue(entity, key, value) {
   if (Array.isArray(entity[key])) {
@@ -137,4 +137,19 @@ export function comparator(...cmps) {
   } else {
     return result;
   }
+}
+
+
+export function invoke(method, context, ...args) {
+
+  if (typeof method !== 'function') {
+    return method;
+  }
+
+  if (args.length === 0 || args.length > 1) {
+    return method.apply(context, args);
+  } else {
+    return method.call(context, args[0]);
+  }
+
 }

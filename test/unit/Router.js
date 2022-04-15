@@ -5,6 +5,7 @@ const DefaultRouter = config.Router;
 const DefaultRouteHandler = config.RouteHandler;
 const DefaultResponseContext = config.ResponseContext;
 const DefaultRequestContext = config.RequestContext;
+
 const hndl = cb => {
   return (r, s, n) => {
     let res = cb && cb(r);
@@ -19,16 +20,16 @@ const handler2 = (req, res, next) => next && next();
 
 let route = '';
 
-describe('Router', function() {
+describe('Router', function () {
   let instance;
-  beforeEach(function() {
+  beforeEach(function () {
     routing.stop();
     instance = new DefaultRouter();
     routing.use(instance);
     instance.get(route, handler1);
   });
 
-  afterEach(function() {
+  afterEach(function () {
     config.Router = DefaultRouter;
     config.RouteHandler = DefaultRouteHandler;
     config.RequestContext = DefaultRequestContext;
@@ -36,8 +37,8 @@ describe('Router', function() {
     document.location.href = 'http://localhost';
   });
 
-  describe('isRoutingStarted', function() {
-    it('should return false if routing not started and true if started', function() {
+  describe('isRoutingStarted', function () {
+    it('should return false if routing not started and true if started', function () {
       expect(instance.isRoutingStarted()).to.be.false;
       routing.start();
       expect(instance.isRoutingStarted()).to.be.true;
@@ -46,8 +47,8 @@ describe('Router', function() {
     });
   });
 
-  describe('use', function() {
-    it('should add globalhandler if called with function argument', function() {
+  describe('use', function () {
+    it('should add globalhandler if called with function argument', function () {
       expect(instance._globalMiddlewares.length).to.be.equal(0);
       instance.use(handler1);
       expect(instance._globalMiddlewares.length).to.be.equal(1);
@@ -57,13 +58,13 @@ describe('Router', function() {
       expect(instance._globalMiddlewares[0]).to.be.equal(handler1);
       expect(instance._globalMiddlewares[1]).to.be.equal(handler2);
     });
-    it('should call `add` if called with two arguments string, func', function() {
+    it('should call `add` if called with two arguments string, func', function () {
       let spy = this.sinon.spy(instance, 'add');
       instance.use('test-test', handler1);
       expect(spy).to.be.calledOnce;
       expect(spy.getCall(0).args).to.be.eql(['test-test', [handler1], true]);
     });
-    it('if called with incorrect arguments should not do anything', function() {
+    it('if called with incorrect arguments should not do anything', function () {
       let spy = this.sinon.spy(instance, 'add');
       let result = instance.use();
       expect(spy).to.not.been.called;
@@ -71,20 +72,20 @@ describe('Router', function() {
       expect(result).to.be.equal(instance);
     });
   });
-  describe('get', function() {
-    it('should proxy call to `add` with given arguments', function() {
+  describe('get', function () {
+    it('should proxy call to `add` with given arguments', function () {
       let spy = this.sinon.spy(instance, 'add');
       instance.get(route, handler1, handler2);
       expect(spy).to.be.calledOnce.and.calledWith(route, [handler1, handler2]);
     });
-    it('should proxy call to `add` with given arguments', function() {
+    it('should proxy call to `add` with given arguments', function () {
       let spy = this.sinon.spy(instance, 'add');
       instance.get();
       expect(spy).to.be.calledOnce.and.calledWith(undefined, []);
     });
   });
-  describe('add', function() {
-    it('should throw error if url absolute and with another origin', function() {
+  describe('add', function () {
+    it('should throw error if url absolute and with another origin', function () {
       expect(
         instance.add.bind(instance, 'http://somehost.com/some/route', [
           handler1
@@ -95,7 +96,7 @@ describe('Router', function() {
         instance.add.bind(instance, 'http://somehost.com/some/route')
       ).to.throw();
     });
-    it('should not throw error if url absolute with same origin', function() {
+    it('should not throw error if url absolute with same origin', function () {
       expect(
         instance.add.bind(instance, 'http://localhost/some/route', [handler1])
       ).to.not.throw();
@@ -105,68 +106,68 @@ describe('Router', function() {
       ).to.not.throw();
     });
 
-    it('should return undefined if path unset', function() {
+    it('should return undefined if path unset', function () {
       let res = instance.add(undefined, []);
       expect(res).to.be.undefined;
     });
-    it('should return routeHandler if arguments correct and it supposed to be regular handler', function() {
+    it('should return routeHandler if arguments correct and it supposed to be regular handler', function () {
       let res = instance.add('', [handler1]);
       expect(res).to.be.instanceOf(config.RouteHandler);
     });
-    it("should throw if arguments correct and it's already initialized as regular routeHandler and `add` called with Router argument", function() {
+    it("should throw if arguments correct and it's already initialized as regular routeHandler and `add` called with Router argument", function () {
       expect(instance.add.bind(instance, '', new config.Router())).to.throw();
     });
-    it('should return routeHandler if arguments correct and it supposed to be Router handler', function() {
+    it('should return routeHandler if arguments correct and it supposed to be Router handler', function () {
       let res = instance.add('somenewroute', new config.Router());
       expect(res).to.be.instanceOf(config.RouteHandler);
     });
-    it('should return routeHandler if provided custom RouteHandler Class', function() {
-      class MyHandler extends config.RouteHandler {}
+    it('should return routeHandler if provided custom RouteHandler Class', function () {
+      class MyHandler extends config.RouteHandler { }
       config.RouteHandler = MyHandler;
       let res = instance.add('myown', [handler2]);
       expect(res).to.be.instanceOf(MyHandler);
     });
-    it('should add routeHandler into routes manager', function() {
+    it('should add routeHandler into routes manager', function () {
       instance.add(route, [handler2]);
       expect(instance.routes.has(route)).to.be.true;
     });
-    it("should proxy call to routeHandler's addHandler", function() {
+    it("should proxy call to routeHandler's addHandler", function () {
       let spy = this.sinon.spy(DefaultRouteHandler.prototype, 'addMiddlewares');
       instance.add(route, [handler2, handler1], true);
       expect(spy).to.be.calledOnce.and.calledWith([handler2, handler1], true);
     });
-    it('should treat urls with leading slash equal to urls without leading slash', function() {
+    it('should treat urls with leading slash equal to urls without leading slash', function () {
       let path = 'foo/bar/baz';
       let handler1 = instance.add(path);
       let handler2 = instance.add('/' + path);
       expect(handler1).to.be.equal(handler2);
     });
   });
-  describe('getRouteHanlder', function() {
+  describe('getRouteHanlder', function () {
     let router;
     let mw;
-    beforeEach(function() {
-      mw = () => {};
+    beforeEach(function () {
+      mw = () => { };
       router = new config.Router();
       routing.use(router);
     });
-    it('should return handler if handler exists', function() {
+    it('should return handler if handler exists', function () {
       router.get('foo/bar/exist', mw);
       let handler = router.getRouteHandler('foo/bar/exist');
       expect(handler).to.be.instanceOf(config.RouteHandler);
       expect(handler.hasMiddleware(mw)).to.be.true;
     });
-    it('should return undefined if there is no handler with thap path', function() {
+    it('should return undefined if there is no handler with thap path', function () {
       let handler = router.getRouteHandler('foo/bar/exist');
       expect(handler).to.be.undefined;
     });
-    describe('when nested routers exist', function() {
+    describe('when nested routers exist', function () {
       let barInFoo;
       let barInAntiFoo;
       let mw2;
-      beforeEach(function() {
-        mw = () => {};
-        mw2 = () => {};
+      beforeEach(function () {
+        mw = () => { };
+        mw2 = () => { };
         let foo = new config.Router();
         let antifoo = new config.Router();
         barInFoo = new config.Router();
@@ -181,7 +182,7 @@ describe('Router', function() {
         routing.use('foo', foo);
         routing.use(':antifoo', antifoo);
       });
-      it('should lookup for correct nested routeHandler and return it', function() {
+      it('should lookup for correct nested routeHandler and return it', function () {
         barInFoo.get('test', mw);
         barInAntiFoo.get('test', mw2);
         let handler = router.getRouteHandler('foo/bar/test');
@@ -192,28 +193,28 @@ describe('Router', function() {
         expect(handler).to.be.instanceOf(config.RouteHandler);
         expect(handler.hasMiddleware(mw2)).to.be.true;
       });
-      it('should not lookup for nested routeHandler if called with traverse `false`', function() {
+      it('should not lookup for nested routeHandler if called with traverse `false`', function () {
         barInFoo.get('test', mw);
         let handler = router.getRouteHandler('foo/bar/test', false);
         expect(handler).to.be.undefined;
       });
     });
   });
-  describe('remove', function() {
-    it('should remove global handler', function() {
+  describe('remove', function () {
+    it('should remove global handler', function () {
       instance.use(handler2);
       instance.use(handler1);
       instance.remove(handler2);
       expect(instance._globalMiddlewares.length).to.be.equal(1);
       expect(instance._globalMiddlewares[0]).to.be.equal(handler1);
     });
-    it('should remove routeHandler', function() {
+    it('should remove routeHandler', function () {
       instance.get('test', handler1);
       instance.get('test2', handler2);
       instance.remove('test2');
       expect(instance.routes.has('test2')).to.be.false;
     });
-    it("should remove routeHandler's middleware", function() {
+    it("should remove routeHandler's middleware", function () {
       instance.get('test', handler1, handler2);
       instance.remove('test', handler1);
       expect(instance.routes.has('test')).to.be.true;
@@ -221,47 +222,47 @@ describe('Router', function() {
       expect(handler.middlewares.length).to.be.equal(1);
       expect(handler.hasMiddleware(handler2)).to.be.true;
     });
-    it('should return removed routeHandler', function() {
-      let handler1 = instance.add('path/to/remove', [() => {}]);
+    it('should return removed routeHandler', function () {
+      let handler1 = instance.add('path/to/remove', [() => { }]);
       let handler2 = instance.remove('path/to/remove');
       expect(handler1)
         .to.be.equal(handler2)
         .and.be.instanceOf(DefaultRouteHandler);
     });
-    it('should return undefined if no routeHandler founded', function() {
+    it('should return undefined if no routeHandler founded', function () {
       let handler = instance.remove('some-path');
       expect(handler).to.be.undefined;
     });
-    describe('when using with nested routers', function() {
+    describe('when using with nested routers', function () {
       let foo;
       let mw1;
       let mw2;
-      beforeEach(function() {
-        mw1 = () => {};
-        mw2 = () => {};
+      beforeEach(function () {
+        mw1 = () => { };
+        mw2 = () => { };
         foo = new config.Router();
         foo.get('test', mw1);
         instance.use('foo', foo);
       });
-      it("should remove nested routeHandler's middleware", function() {
+      it("should remove nested routeHandler's middleware", function () {
         let handler = routing.remove('foo/test', mw1);
         expect(handler).to.be.instanceOf(config.RouteHandler);
         handler = instance.getRouteHandler('foo/test');
         expect(handler.hasMiddleware(mw1)).to.be.false;
       });
-      it("should not remove nested routeHandler's middleware if traverse is false", function() {
+      it("should not remove nested routeHandler's middleware if traverse is false", function () {
         let handler = routing.remove('foo/test', mw1, false);
         expect(handler).to.be.undefined;
         handler = instance.getRouteHandler('foo/test');
         expect(handler.hasMiddleware(mw1)).to.be.true;
       });
-      it('should remove nested routeHandler by path', function() {
+      it('should remove nested routeHandler by path', function () {
         let handler = routing.remove('foo/test');
         expect(handler).to.be.instanceOf(config.RouteHandler);
         expect(handler.hasMiddleware(mw1)).to.be.true;
         expect(instance.getRouteHandler('foo/test')).to.be.undefined;
       });
-      it('should not remove nested routeHandler by path if traverse is false', function() {
+      it('should not remove nested routeHandler by path if traverse is false', function () {
         let handler = routing.remove('foo/test', null, false);
         expect(handler).to.be.undefined;
         expect(instance.getRouteHandler('foo/test')).to.be.instanceOf(
@@ -269,28 +270,28 @@ describe('Router', function() {
         );
       });
 
-      it('should not remove router routeHandler if traverse is explicitly true', function() {
+      it('should not remove router routeHandler if traverse is explicitly true', function () {
         foo.get('', mw2);
         routing.remove('foo', true);
         let handler = instance.getRouteHandler('foo', false);
         expect(handler).to.be.instanceOf(config.RouteHandler);
       });
 
-      it('should remove router routeHandler if traverse is explicitly false', function() {
+      it('should remove router routeHandler if traverse is explicitly false', function () {
         foo.get('', mw2);
         routing.remove('foo', false);
         let handler = instance.getRouteHandler('foo', false);
         expect(handler).to.be.undefined;
       });
 
-      it('should remove router routeHandler if traverse is not set', function() {
+      it('should remove router routeHandler if traverse is not set', function () {
         foo.get('', mw2);
         routing.remove('foo');
         let handler = instance.getRouteHandler('foo', false);
         expect(handler).to.be.undefined;
       });
 
-      it('should remove nested router routeHandler root middleware if traverse explicitly true', function() {
+      it('should remove nested router routeHandler root middleware if traverse explicitly true', function () {
         foo.get('', mw2);
         let handler = routing.remove('foo', mw2, true);
         let root = instance.getRouteHandler('foo', false);
@@ -300,7 +301,7 @@ describe('Router', function() {
         expect(handler.path).to.be.equal('/');
         expect(handler.hasMiddleware(mw2)).to.be.false;
       });
-      it('should remove nested router routeHandler root middleware if traverse is not set', function() {
+      it('should remove nested router routeHandler root middleware if traverse is not set', function () {
         foo.get('', mw2);
         let handler = routing.remove('foo', mw2);
         let root = instance.getRouteHandler('foo', false);
@@ -310,7 +311,7 @@ describe('Router', function() {
         expect(handler.path).to.be.equal('/');
         expect(handler.hasMiddleware(mw2)).to.be.false;
       });
-      it('should not remove nested router routeHandler root middleware if traverse is set to false', function() {
+      it('should not remove nested router routeHandler root middleware if traverse is set to false', function () {
         foo.get('', mw2);
         let handler = routing.remove('foo', mw2, false);
         let root = instance.getRouteHandler('foo', false);
@@ -323,7 +324,7 @@ describe('Router', function() {
         expect(handler, 'handler is not root').to.be.not.equal(root);
         expect(handler.hasMiddleware(mw2), 'handler middleware').to.be.true;
       });
-      it('should remove nested router global middleware  if traverse is set to false', function() {
+      it('should remove nested router global middleware  if traverse is set to false', function () {
         foo.get('', mw2);
         foo.use(mw2);
         instance.use(mw2);
@@ -341,42 +342,42 @@ describe('Router', function() {
       });
     });
   });
-  describe('createRequestContext', function() {
-    it('should return instance of config.RequestContext when using own RequestContext', function() {
-      class MyRouteContext extends config.RequestContext {}
+  describe('createRequestContext', function () {
+    it('should return instance of config.RequestContext when using own RequestContext', function () {
+      class MyRouteContext extends config.RequestContext { }
       config.RequestContext = MyRouteContext;
       let context = instance.createRequestContext('');
       expect(context).to.be.instanceOf(MyRouteContext);
     });
-    it('should return instance of config.RequestContext', function() {
+    it('should return instance of config.RequestContext', function () {
       let context = instance.createRequestContext('');
       expect(context).to.be.instanceOf(config.RequestContext);
     });
   });
-  describe('createResponseContext', function() {
-    it('should return instance of config.ResponseContext when using own ResponseContext', function() {
-      class MyContext extends config.ResponseContext {}
+  describe('createResponseContext', function () {
+    it('should return instance of config.ResponseContext when using own ResponseContext', function () {
+      class MyContext extends config.ResponseContext { }
       config.ResponseContext = MyContext;
       let context = instance.createResponseContext('');
       expect(context).to.be.instanceOf(MyContext);
     });
-    it('should return instance of config.ResponseContext', function() {
+    it('should return instance of config.ResponseContext', function () {
       let context = instance.createResponseContext('');
       expect(context).to.be.instanceOf(config.ResponseContext);
     });
   });
 
-  describe('error handling', function() {
-    describe('getErrorHandlerName', function() {
-      it('should return `exception` if error is instanceof Error', function() {
+  describe('error handling', function () {
+    describe('getErrorHandlerName', function () {
+      it('should return `exception` if error is instanceof Error', function () {
         let res = instance.getErrorHandlerName(new Error());
         expect(res).to.be.equal('exception');
       });
-      it('should return given string value if error is a string', function() {
+      it('should return given string value if error is a string', function () {
         let res = instance.getErrorHandlerName('my-error');
         expect(res).to.be.equal('my-error');
       });
-      it('should return `default` if error not an error or string', function() {
+      it('should return `default` if error not an error or string', function () {
         let res = instance.getErrorHandlerName();
         expect(res).to.be.equal('default');
         res = instance.getErrorHandlerName({});
@@ -387,11 +388,11 @@ describe('Router', function() {
         expect(res).to.be.equal('default');
       });
     });
-    describe('setErrorHandlers', function() {
+    describe('setErrorHandlers', function () {
       let spyError1;
       let spyError2;
       let spyDefault;
-      beforeEach(function() {
+      beforeEach(function () {
         instance = new DefaultRouter({
           errorHandlers: {
             default: () => 'default',
@@ -403,7 +404,7 @@ describe('Router', function() {
         spyError1 = this.sinon.spy(instance._errorHandlers, 'error1');
         spyError2 = this.sinon.spy(instance._errorHandlers, 'error2');
       });
-      it('should merge handlers', function() {
+      it('should merge handlers', function () {
         let error1 = this.sinon.spy();
         instance.setErrorHandlers(false, {
           error1
@@ -414,7 +415,7 @@ describe('Router', function() {
         expect(spyError1).to.be.not.called;
         expect(spyError2).to.be.calledOnce;
       });
-      it('should replace handlers', function() {
+      it('should replace handlers', function () {
         let defaultSpy = this.sinon.spy();
         instance.setErrorHandlers(true, {
           default: defaultSpy
@@ -426,7 +427,7 @@ describe('Router', function() {
         expect(spyDefault).to.be.not.called;
         expect(defaultSpy).to.be.calledTwice;
       });
-      it('should be able accept only errorHandlers hash and use merge approach in this case', function() {
+      it('should be able accept only errorHandlers hash and use merge approach in this case', function () {
         let defaultSpy = this.sinon.spy();
         let nextSpy = this.sinon.spy();
         instance.setErrorHandlers(
@@ -445,7 +446,7 @@ describe('Router', function() {
         expect(spyError2).to.not.be.called;
         expect(nextSpy).to.be.calledOnce;
       });
-      it('should be able accept only errorHandlers array of hash and use merge approach in this case', function() {
+      it('should be able accept only errorHandlers array of hash and use merge approach in this case', function () {
         let defaultSpy = this.sinon.spy();
         let nextSpy = this.sinon.spy();
         instance.setErrorHandlers([
@@ -465,10 +466,10 @@ describe('Router', function() {
         expect(nextSpy).to.be.calledOnce;
       });
     });
-    describe('handleError', function() {
+    describe('handleError', function () {
       let OopsError;
       let errorHandle;
-      beforeEach(function() {
+      beforeEach(function () {
         OopsError = new Error('oops');
         instance.get('/throw', () => {
           throw OopsError;
@@ -483,32 +484,32 @@ describe('Router', function() {
         routing.start();
       });
 
-      describe('when called', function() {
+      describe('when called', function () {
         //let spy;
-        beforeEach(function() {
+        beforeEach(function () {
           errorHandle = sinon.spy(instance, 'handleError');
         });
-        afterEach(function() {
+        afterEach(function () {
           sinon.restore();
         });
-        it('should be called with `notfound` if there is no route handler', async function() {
+        it('should be called with `notfound` if there is no route handler', async function () {
           //expect(routing.instance).to.be.equal(instance);
           await routing.navigate('foo/bar');
           expect(errorHandle).to.be.calledOnce.and.calledWith('notfound');
         });
-        it('should be called with given custom error', async function() {
+        it('should be called with given custom error', async function () {
           await routing.navigate('custom');
           expect(errorHandle).to.be.calledOnce.and.calledWith('custom');
         });
-        it('should be called with js error', async function() {
+        it('should be called with js error', async function () {
           await routing.navigate('javascript');
           expect(errorHandle).to.be.calledOnce.and.calledWith(OopsError);
         });
-        it('should be called with js error when throw', async function() {
+        it('should be called with js error when throw', async function () {
           await routing.navigate('throw');
           expect(errorHandle).to.be.calledOnce.and.calledWith(OopsError);
         });
-        it('should be called with given custom error', async function() {
+        it('should be called with given custom error', async function () {
           await routing.navigate('custom');
           expect(errorHandle).to.be.calledOnce.and.calledWith('custom');
         });
@@ -516,30 +517,30 @@ describe('Router', function() {
     });
   });
 
-  describe('navigate', function() {
+  describe('navigate', function () {
     let instance;
-    beforeEach(function() {
+    beforeEach(function () {
       instance = new config.Router();
       routing.use(instance);
       routing.start({ trigger: false });
     });
-    afterEach(function() {
+    afterEach(function () {
       routing.stop();
     });
-    it('should throw if not started', function() {
+    it('should throw if not started', function () {
       routing.stop();
       expect(instance.navigate.bind(instance)).to.throw();
     });
-    it("should call routeHandler's processRequest with passed globalMiddlewares if routeHandler exist", function() {
+    it("should call routeHandler's processRequest with passed globalMiddlewares if routeHandler exist", function () {
       let spy = this.sinon.spy(DefaultRouteHandler.prototype, 'processRequest');
-      instance.get('foo/bar', () => {});
-      let glblmw = () => {};
+      instance.get('foo/bar', () => { });
+      let glblmw = () => { };
       instance.use(glblmw);
       instance.navigate('foo/bar');
       expect(spy).to.be.calledOnce;
       expect(spy.getCall(0).args[2].globalMiddlewares).to.be.eql([glblmw]);
     });
-    it('should delegate to correct routeHandler with strictly defined routes', function() {
+    it('should delegate to correct routeHandler with strictly defined routes', function () {
       let res = 'x';
       let mw1 = hndl(() => (res = 'foo'));
       let mw2 = hndl(() => (res = 'foo/bar'));
@@ -565,11 +566,11 @@ describe('Router', function() {
       expect(res).to.be.equal('foo/bar');
     });
 
-    describe('trailingSlash', function() {
-      afterEach(function() {
+    describe('trailingSlash', function () {
+      afterEach(function () {
         config.trailingSlashSensitive = false;
       });
-      it('should correctly handle # in the url if trailingSlashSensitive is false', async function() {
+      it('should correctly handle # in the url if trailingSlashSensitive is false', async function () {
         let mw1 = sinon.spy();
         let mw2 = sinon.spy();
 
@@ -587,7 +588,7 @@ describe('Router', function() {
         expect(mw2.callCount).to.be.equal(2);
       });
     });
-    describe('navigation with routers v2', function() {
+    describe('navigation with routers v2', function () {
       let counters;
       let inc;
       let gmw1;
@@ -604,7 +605,7 @@ describe('Router', function() {
           }
         };
       };
-      beforeEach(function() {
+      beforeEach(function () {
         argumentsSpy = sinon.spy();
         counters = {};
         inc = sinon.spy(key => {
@@ -650,7 +651,7 @@ describe('Router', function() {
         routing.use('art', art);
         routing.use('test', test);
       });
-      it("should correctly process nested router's request", async function() {
+      it("should correctly process nested router's request", async function () {
         await routing.navigate('acc/login');
         expect(counters['acc/login']).to.be.equal(1);
         expect(gmw1, 'gmw1').to.be.calledOnce;
@@ -667,7 +668,7 @@ describe('Router', function() {
         expect(gmw2.callCount, 'gmw2').to.be.equal(2);
         expect(gmw3.callCount, 'gmw3').to.be.equal(2);
       });
-      it('should execute nested router routeHandler and args should be ok', async function() {
+      it('should execute nested router routeHandler and args should be ok', async function () {
         await routing.navigate('test/pupkin/arts/aboutCats');
 
         expect(counters[':division/:subdivion']).to.be.equal(1);
@@ -678,7 +679,7 @@ describe('Router', function() {
         });
       });
     });
-    describe('navigation v2', function() {
+    describe('navigation v2', function () {
       let counters;
       let inc;
       const keyedInc = key => {
@@ -686,7 +687,7 @@ describe('Router', function() {
           inc(key);
         });
       };
-      beforeEach(function() {
+      beforeEach(function () {
         counters = {};
         inc = sinon.spy(key => {
           counters[key] = counters[key] ? ++counters[key] : 1;
@@ -703,7 +704,7 @@ describe('Router', function() {
         });
       });
 
-      it('static routes should have priority over parametrized', async function() {
+      it('static routes should have priority over parametrized', async function () {
         let routes = routing.instance.routes.items;
 
         keyedInc('foo/:bar');
@@ -730,7 +731,7 @@ describe('Router', function() {
         expect(counters['foo/bar']).to.be.equal(2);
         expect(counters['foo/:bar']).to.be.equal(1);
       });
-      it('should choose correct handler', async function() {
+      it('should choose correct handler', async function () {
         keyedInc('');
         keyedInc(':foo/:zoo');
         keyedInc(':foo(/bar)/:zoo');
@@ -741,7 +742,7 @@ describe('Router', function() {
         await routing.navigate('abra/bar/kadabra');
         expect(counters[':foo(/bar)/:zoo']).to.be.equal(1);
       });
-      it('should delegate to correct routeHandler', async function() {
+      it('should delegate to correct routeHandler', async function () {
         keyedInc('foo/:action/:id');
         keyedInc('foo/:action/some');
         keyedInc('foo/:action');
@@ -809,7 +810,7 @@ describe('Router', function() {
       });
     });
   });
-  describe('hash based navigate', function() {
+  describe('hash based navigate', function () {
     let counters;
     let inc;
     const keyedInc = key => {
@@ -817,7 +818,7 @@ describe('Router', function() {
         inc(key);
       });
     };
-    beforeEach(function() {
+    beforeEach(function () {
       config.useHashes = true;
       counters = {};
       inc = sinon.spy(key => {
@@ -834,10 +835,10 @@ describe('Router', function() {
         }
       });
     });
-    afterEach(function() {
+    afterEach(function () {
       config.useHashes = false;
     });
-    it('static routes should have priority over parametrized', async function() {
+    it('static routes should have priority over parametrized', async function () {
       keyedInc('foo/:bar');
       keyedInc('foo/bar');
 
@@ -851,7 +852,7 @@ describe('Router', function() {
       expect(counters['foo/bar']).to.be.equal(1);
       expect(counters['foo/:bar']).to.be.equal(1);
     });
-    it('should choose correct handler', async function() {
+    it('should choose correct handler', async function () {
       keyedInc('');
       keyedInc(':foo/:zoo');
       keyedInc(':foo(/bar)/:zoo');
@@ -862,7 +863,7 @@ describe('Router', function() {
       await routing.navigate('abra/bar/kadabra');
       expect(counters[':foo(/bar)/:zoo']).to.be.equal(1);
     });
-    it('should delegate to correct routeHandler', async function() {
+    it('should delegate to correct routeHandler', async function () {
       keyedInc('foo/:action/:id');
       keyedInc('foo/:action/some');
       keyedInc('foo/:action');

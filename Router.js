@@ -1,5 +1,5 @@
 import config from './config';
-import { getUrl, comparator } from './utils';
+import { getUrl, comparator, invoke } from './utils';
 import RoutesManager from './RoutesManager';
 
 /**
@@ -26,10 +26,19 @@ class Router {
    */
   constructor(options = {}) {
     this.options = { ...options };
-    this.routes = new RoutesManager();
+
+    let Manager = config.RoutesManager || RoutesManager;
+    this.routes = new Manager();
+
     this._globalMiddlewares = [];
     this._nestedInHandlers = [];
     this.setErrorHandlers(this.errorHandlers, options.errorHandlers);
+    if (options.onRequestStart !== void 0) {
+      this.onRequestStart = options.onRequestStart;
+    }
+    if (options.onRequestEnd !== void 0) {
+      this.onRequestEnd = options.onRequestEnd;
+    }
   }
 
   /**
@@ -276,7 +285,11 @@ class Router {
     let req = this.createRequestContext(url, options);
     let res = this.createResponseContext(req);
 
+    //this.trigger('request:start', req, res, options);
+    invoke(this.onRequestStart, this, req, res, options);
+
     let context = this.findRouteHandlerContext(req);
+
     if (!context) {
       this.handleError('notfound', req, res);
       return;
@@ -290,9 +303,14 @@ class Router {
     } catch (ex) {
       res.setError(ex);
     }
-    if (res.error) {
-      this.handleError(res.error, req, res);
-    }
+
+    this.handleError(res.error, req, res);
+
+    // if (res.error) {
+    //   this.handleError(res.error, req, res);
+    // } else {
+    //   invoke(this.onRequestEnd, this, void 0, req, res, options);
+    // }
     return result;
   }
 
@@ -345,7 +363,6 @@ class Router {
     let possibleContexts = allcontexts.sort((a, b) =>
       comparator([b, a, x => x.path.requiredStatic], [a, b, x => x.path.total])
     );
-
     for (let context of possibleContexts) {
       if (this.testRouteHandlerContext(req, context)) {
         return context;
@@ -378,6 +395,10 @@ class Router {
    * @memberof Router
    */
   handleError(error, req, res) {
+
+    invoke(this.onRequestEnd, this, error, req, res);
+    if (!error) return;
+
     let errorKey = this.getErrorHandlerName(error);
     let defaultHandler = this._errorHandlers.default;
     let handler = this._errorHandlers[errorKey];
@@ -461,6 +482,9 @@ class Router {
     //    undefined - request will be process only if url is not current url
     let shouldTrigger =
       (options.trigger !== false && !iscurrent) || options.trigger === true;
+
+
+
     let result =
       (shouldTrigger && this._processRequest(url, options)) ||
       Promise.resolve(false);

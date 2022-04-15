@@ -84,16 +84,17 @@ export default {
    * @returns {Router}
    */
   start(options) {
-    this._ensureRouter();
 
-    if (typeof options != 'object') {
+    if (!options) {
       options = {};
     }
+
+    this._ensureRouter();
 
     if (this.isStarted()) {
       throw new Error('Routing already started');
     }
-    config.isStarted = true;
+
 
     if (options.errorHandlers) {
       //applying errorHandlers if any
@@ -103,10 +104,21 @@ export default {
       );
     }
 
+    if (options.onRequestStart !== void 0) {
+      this.instance.onRequestStart = options.onRequestStart;
+    }
+
+    if (options.onRequestEnd !== void 0) {
+      this.instance.onRequestEnd = options.onRequestEnd;
+    }
+
     if (options.useHashes != null) {
       //update routing useHashes flag
       config.useHashes = options.useHashes === true;
     }
+
+
+    config.isStarted = true;
 
     let navigateOptions = Object.assign({}, options, { pushState: false });
     if (options.trigger !== false) {

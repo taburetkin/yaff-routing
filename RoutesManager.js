@@ -76,4 +76,5 @@ class RoutesManager {
     return this.get(path) instanceof config.RouteHandler;
   }
 }
+
 export default RoutesManager;

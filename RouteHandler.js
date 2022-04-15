@@ -124,7 +124,7 @@ class RouteHandler {
         path: new PathContext([...segments, ...this._path.segments]),
         router
       };
-      //console.log('> cntx', context.path.segments.map(m => m.value));
+
       return [context];
     }
   }
@@ -187,10 +187,24 @@ class RouteHandler {
     let middlewares = [...globalMiddlewares, ...this.middlewares];
 
     // creating middleware's chain.
-    let firstMiddleware = this._createNextHandler(req, res, middlewares);
+    // let firstMiddleware = this._createNextHandler(req, res, middlewares);
 
-    return await firstMiddleware();
+    let goNext = false;
+    let next = () => goNext = true;
+    let result;
+    for (let mw of middlewares) {
+      goNext = false;
+      result = await mw(req, res, next);
+      if (!goNext) break;
+    }
+
+    return Promise.resolve(result);
+
   }
+
+  // _createRequestPipe(req, res, middlewares) {
+
+  // }
 
   /**
    * Extracts route arguments into key-value object.
@@ -204,12 +218,13 @@ class RouteHandler {
     let thispath = _path ? _path.path : this.path;
     let pattern = this._buildPattern(thispath);
     let params = (pattern.exec(req.path) || []).slice(1);
-    //console.log('>>', params, pattern);
+
     params.pop();
 
     let matches = thispath.match(/[:|*]\w+/g) || [];
     let args = matches.reduce((memo, paramName, index) => {
       paramName = paramName.substring(1);
+
       if (index > params.length) return memo;
 
       addValue(memo, paramName, params[index]);
@@ -228,7 +243,6 @@ class RouteHandler {
   //  */
   // testRequest(req, root) {
   //   if (this.isRouter()) {
-  //     console.log(this._path.generatePattern());
   //   } else {
   //     if (this._path.isRoot()) {
   //       return req._path.isRoot();
@@ -239,12 +253,14 @@ class RouteHandler {
   // }
 
   //#region private helpers
-  _createNextHandler(req, res, handlers) {
-    let handler = handlers.shift();
-    if (!handler) return () => {};
-    let next = this._createNextHandler(req, res, handlers);
-    return async () => await handler(req, res, next);
-  }
+  // DEPRECATED:
+  // _createNextHandler(req, res, handlers) {
+  //   let handler = handlers.shift();
+  //   if (!handler) return () => { };
+  //   let next = this._createNextHandler(req, res, handlers);
+  //   return async () => await handler(req, res, next);
+  // }
+
   _getUrl(url) {
     return getUrl(url, config.useHashes);
   }

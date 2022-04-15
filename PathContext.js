@@ -54,7 +54,7 @@ class PathSegment {
       return '([^]+)?';
     }
 
-    let value = this.value.replace(/:\w+/g, '\\w+');
+    let value = this.value.replace(/:[\w\d_]+/g, '[\\w\\d-]+');
     value = value.replace(/\(([^)]+)\)/g, '($1)?');
 
     return value;
@@ -79,14 +79,14 @@ class PathContext {
     let segments = this._buildSegments(url);
     Object.assign(this, this._buildSegmentsInfo(segments));
     this.path = this.segments.join('');
-    if (this.path == '') {
+    if (this.path === '') {
       this.path == '/';
     }
   }
 
   toString() {
     let path = this.segments.join('');
-    if (path == '') {
+    if (path === '') {
       path = '/';
     }
     return path;

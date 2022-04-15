@@ -1,11 +1,17 @@
 {
 	"name": "yaff-routing",
-	"version": "1.0.0",
-	"description": "javascript front-end routing pack",
+	"version": "1.0.1",
+	"description": "javascript front-end routing pack with api pretty similar to node express",
 	"main": "index.js",
 	"module": "index.js",
 	"author": "dimtabu <dima.taburetkin@gmail.com>",
 	"license": "MIT",
+  "keywords": [
+    "routing",
+    "pushState",
+    "history",
+    "front-end"
+  ],
 	"scripts": {
 		"docs": "node tooling/jsdocs",
 		"build": "yarn build-es5 && yarn build-esm",
