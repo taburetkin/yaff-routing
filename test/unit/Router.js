@@ -1,4 +1,7 @@
 // import { buildSegments } from '../../utils';
+
+import routing from "../../routing";
+
 // import PathContext from '../../PathContext';
 const config = routing.config;
 const DefaultRouter = config.Router;
@@ -40,7 +43,7 @@ describe('Router', function () {
   describe('isRoutingStarted', function () {
     it('should return false if routing not started and true if started', function () {
       expect(instance.isRoutingStarted()).to.be.false;
-      routing.start();
+      routing.start({ trigger: false });
       expect(instance.isRoutingStarted()).to.be.true;
       routing.stop();
       expect(instance.isRoutingStarted()).to.be.false;
@@ -481,13 +484,17 @@ describe('Router', function () {
           res.setError(OopsError);
         });
 
-        routing.start();
+        routing.start({ trigger: false });
+
       });
 
       describe('when called', function () {
         //let spy;
         beforeEach(function () {
           errorHandle = sinon.spy(instance, 'handleError');
+          routing.instance.setErrorHandlers(true, {
+            default: () => { },
+          })
         });
         afterEach(function () {
           sinon.restore();
@@ -514,6 +521,16 @@ describe('Router', function () {
           expect(errorHandle).to.be.calledOnce.and.calledWith('custom');
         });
       });
+    });
+    it('should throw if there is no ErrorHandler', () => {
+      routing.instance.setErrorHandlers(true, { default: undefined, exception: undefined });
+      routing.get('test-exception', () => {
+        throw new Error('Ooops')
+      });
+      routing.start({ trigger: false });
+      sinon.spy(routing.instance, 'handleError');
+      routing.navigate('test-exception').catch(() => { });
+      expect(routing.instance.handleError).to.throw();
     });
   });
 

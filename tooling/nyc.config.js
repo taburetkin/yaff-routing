@@ -6,6 +6,7 @@ module.exports = {
     'index.js',
     'config.js',
     'Routing.js',
+    'Router.js',
     'RouteHandler.js',
     'RoutesManager.js',
     'ResponseContext.js',

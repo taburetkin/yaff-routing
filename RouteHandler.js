@@ -194,8 +194,16 @@ class RouteHandler {
     let result;
     for (let mw of middlewares) {
       goNext = false;
+
       result = await mw(req, res, next);
       if (!goNext) break;
+
+      // try {
+      // } catch (exc) {
+      //   //console.error(exc);
+      //   throw exc;
+      // }
+
     }
 
     return Promise.resolve(result);

@@ -301,6 +301,7 @@ class Router {
     try {
       result = await handler.processRequest(req, res, processOptions);
     } catch (ex) {
+      //console.warn(ex);
       res.setError(ex);
     }
 
@@ -395,7 +396,7 @@ class Router {
    * @memberof Router
    */
   handleError(error, req, res) {
-
+    //console.log('-now handling error-');
     invoke(this.onRequestEnd, this, error, req, res);
     if (!error) return;
 
@@ -404,8 +405,12 @@ class Router {
     let handler = this._errorHandlers[errorKey];
     if (typeof handler === 'function') {
       handler.call(this, error, req, res);
-    } else if (errorKey !== 'default' && typeof defaultHandler == 'function') {
+    } else if (errorKey !== 'default' && typeof defaultHandler === 'function') {
       defaultHandler.call(this, error, req, res);
+    } else {
+      //new Error(req.path + ': ' + errorKey);
+      //console.error('error type:', errorKey, 'path:', req.path);
+      throw error;
     }
   }
 
