@@ -104,11 +104,11 @@ export default {
       );
     }
 
-    if (options.onRequestStart !== void 0) {
+    if (typeof options.onRequestStart === 'function') {
       this.instance.onRequestStart = options.onRequestStart;
     }
 
-    if (options.onRequestEnd !== void 0) {
+    if (typeof options.onRequestEnd === 'function') {
       this.instance.onRequestEnd = options.onRequestEnd;
     }
 

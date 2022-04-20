@@ -52,6 +52,7 @@ class RouteHandler {
     this.router._releaseHandler(this);
     this.router = null;
   }
+
   _setRouter(router) {
     if (router == null) {
       return;
@@ -105,6 +106,16 @@ class RouteHandler {
     if (index < 0) return;
     this.middlewares.splice(index, 1);
     return middleware;
+  }
+
+  /**
+   * Checks if given router is nested somewhere in route contexts
+   * @param {*} router 
+   * @returns {boolean}
+   */
+  hasNestedRouter(router) {
+    if (!router) { return false; }
+    return this.isRouter() && this.router.hasNestedRouter(router);
   }
 
   getRouteContexts(parentContext) {
@@ -194,16 +205,8 @@ class RouteHandler {
     let result;
     for (let mw of middlewares) {
       goNext = false;
-
       result = await mw(req, res, next);
       if (!goNext) break;
-
-      // try {
-      // } catch (exc) {
-      //   //console.error(exc);
-      //   throw exc;
-      // }
-
     }
 
     return Promise.resolve(result);

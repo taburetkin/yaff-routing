@@ -1,6 +1,7 @@
-import routing from '../../routing';
+//import routing from '../../routing';
 import { delay } from '../tests-helpers';
 
+const routing = global.routing;
 const config = global.config;
 
 describe('RouteHandler', function () {

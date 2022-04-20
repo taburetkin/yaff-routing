@@ -1,4 +1,4 @@
-# yaff-routing v1.0.1
+# yaff-routing v1.1.0
 
 Simple frontend routing with pretty similar to nodejs express API.
 

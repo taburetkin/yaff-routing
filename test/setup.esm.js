@@ -1,9 +1,8 @@
 require('./setup.common');
 
-const { routing, config } = require('../lib/yaff.routing.esm');
+const { routing, config, normalizeUrl, replaceUrlParams } = require('../lib/yaff.routing.esm');
 
 global.routing = routing;
 global.config = config;
-
-// const config = require('../config');
-// Object.assign(config, routing.config);
+global.normalizeUrl = normalizeUrl;
+global.replaceUrlParams = replaceUrlParams;

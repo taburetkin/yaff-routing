@@ -1,6 +1,7 @@
 // import { buildSegments } from '../../utils';
 
-import routing from "../../routing";
+//import RouteHandler from "../../RouteHandler";
+//import routing from "../../routing";
 
 // import PathContext from '../../PathContext';
 const config = routing.config;
@@ -40,6 +41,53 @@ describe('Router', function () {
     document.location.href = 'http://localhost';
   });
 
+  describe('constructing instance', () => {
+    describe('options', function () {
+      let router;
+      let startHook;
+      let endHook;
+
+      beforeEach(function () {
+        startHook = this.sinon.spy();
+        endHook = this.sinon.spy();
+        router = new DefaultRouter({
+          errorHandlers: { default: () => { } },
+          onRequestStart: startHook,
+          onRequestEnd: endHook,
+        });
+        routing.start({ trigger: false });
+      });
+
+      it('should set onRequestStart hook', () => {
+        expect(router.onRequestStart).to.be.equal(startHook);
+      });
+      it('should set onRequestEnd hook', () => {
+        expect(router.onRequestEnd).to.be.equal(endHook);
+      });
+      it('should invoke both hooks', () => {
+        router._processRequest('/asd/qwe');
+        expect(startHook).to.be.calledOnce;
+        expect(endHook).to.be.calledOnce;
+      });
+    });
+    it('should not throw even if there is no RouteManager in config', () => {
+      let RoutesManager = config.RoutesManager;
+      delete config.RoutesManager;
+
+      let error;
+      try {
+        new DefaultRouter();
+      } catch (e) {
+        error = e;
+      }
+
+      config.RoutesManager = RoutesManager;
+
+      expect(error).to.be.undefined;
+    });
+  });
+
+
   describe('isRoutingStarted', function () {
     it('should return false if routing not started and true if started', function () {
       expect(instance.isRoutingStarted()).to.be.false;
@@ -47,6 +95,32 @@ describe('Router', function () {
       expect(instance.isRoutingStarted()).to.be.true;
       routing.stop();
       expect(instance.isRoutingStarted()).to.be.false;
+    });
+  });
+
+  describe('hasNestedRouter', () => {
+    it('should return false if falsy argument provided', () => {
+      expect(instance.hasNestedRouter.bind(instance, null)).to.not.throw();
+    });
+  });
+
+
+
+  describe('getRouteContexts circular nesting', () => {
+    it('getRouteContexts should be able detect circular router nesting', () => {
+      let router = new DefaultRouter();
+      let handler = new DefaultRouteHandler('somepath', router);
+      router.routes.add(handler);
+      expect(router.getRouteContexts.bind(router)).to.throw();
+    });
+  });
+
+  describe('should not allow use navigate on nested router', () => {
+    it('should not allow use navigate on nested router', () => {
+      let router = new DefaultRouter();
+      let nested = new DefaultRouter();
+      router.add('something', nested);
+      expect(nested.navigate.bind(nested)).to.throw();
     });
   });
 
@@ -86,8 +160,28 @@ describe('Router', function () {
       instance.get();
       expect(spy).to.be.calledOnce.and.calledWith(undefined, []);
     });
+
   });
   describe('add', function () {
+    it('should not allow circular router nesting', () => {
+
+      let art = new DefaultRouter();
+      art.get('article1', () => { });
+
+      let contacts = new DefaultRouter();
+      contacts.get('contact1', () => { });
+
+      art.use('contacts', contacts);
+      expect(contacts.use.bind(contacts, 'articles', art)).to.throw();
+      expect(contacts.use.bind(contacts, 'articles', contacts)).to.throw();
+    });
+    it('should allow add same router with different path', () => {
+      let root = new DefaultRouter();
+      let nested = new DefaultRouter();
+      root.add('test1', nested);
+      //root.add('test2/deepInside', nested);
+      expect(root.add.bind(root, 'test2/deepInside', nested)).to.not.throw();
+    });
     it('should throw error if url absolute and with another origin', function () {
       expect(
         instance.add.bind(instance, 'http://somehost.com/some/route', [
@@ -395,6 +489,7 @@ describe('Router', function () {
       let spyError1;
       let spyError2;
       let spyDefault;
+      let silentHandle;
       beforeEach(function () {
         instance = new DefaultRouter({
           errorHandlers: {
@@ -403,11 +498,16 @@ describe('Router', function () {
             error2: () => 'error2'
           }
         });
+        silentHandle = (name) => {
+          try {
+            instance.handleError(name);
+          } catch (e) { }
+        }
         spyDefault = this.sinon.spy(instance._errorHandlers, 'default');
         spyError1 = this.sinon.spy(instance._errorHandlers, 'error1');
         spyError2 = this.sinon.spy(instance._errorHandlers, 'error2');
       });
-      it('should merge handlers', function () {
+      it('/*well be deprecated*/ should merge handlers', function () {
         let error1 = this.sinon.spy();
         instance.setErrorHandlers(false, {
           error1
@@ -418,7 +518,7 @@ describe('Router', function () {
         expect(spyError1).to.be.not.called;
         expect(spyError2).to.be.calledOnce;
       });
-      it('should replace handlers', function () {
+      it('/*well be deprecated*/ should replace handlers', function () {
         let defaultSpy = this.sinon.spy();
         instance.setErrorHandlers(true, {
           default: defaultSpy
@@ -430,7 +530,7 @@ describe('Router', function () {
         expect(spyDefault).to.be.not.called;
         expect(defaultSpy).to.be.calledTwice;
       });
-      it('should be able accept only errorHandlers hash and use merge approach in this case', function () {
+      it('/*well be deprecated*/ should be able accept only errorHandlers hash and use merge approach in this case', function () {
         let defaultSpy = this.sinon.spy();
         let nextSpy = this.sinon.spy();
         instance.setErrorHandlers(
@@ -449,7 +549,7 @@ describe('Router', function () {
         expect(spyError2).to.not.be.called;
         expect(nextSpy).to.be.calledOnce;
       });
-      it('should be able accept only errorHandlers array of hash and use merge approach in this case', function () {
+      it('/*well be deprecated*/ should be able accept only errorHandlers array of hash and use merge approach in this case', function () {
         let defaultSpy = this.sinon.spy();
         let nextSpy = this.sinon.spy();
         instance.setErrorHandlers([
@@ -468,6 +568,59 @@ describe('Router', function () {
         expect(spyError2).to.not.be.called;
         expect(nextSpy).to.be.calledOnce;
       });
+
+
+
+      it('should not touch error handlers if no arguments or wrong arguments are passed', () => {
+        instance.setErrorHandlers();
+        instance.setErrorHandlers(false);
+        instance.setErrorHandlers(undefined);
+
+        silentHandle('default');
+        silentHandle('error1');
+        silentHandle('error2');
+
+        expect(spyDefault).to.be.calledOnce;
+        expect(spyError1).to.be.calledOnce;
+        expect(spyError2).to.be.calledOnce;
+      });
+
+      it('should clean error handlers if null passed', () => {
+        instance.setErrorHandlers(null);
+
+        silentHandle('default');
+        silentHandle('error1');
+        silentHandle('error2');
+
+
+        expect(spyDefault).to.be.not.called;
+        expect(spyError1).to.be.not.called;
+        expect(spyError2).to.be.not.called;
+      });
+
+      it('should remove provided handlers and leave others in a place', () => {
+        instance.setErrorHandlers({ default: null, error2: undefined });
+        silentHandle('default');
+        silentHandle('error1');
+        silentHandle('error2');
+        expect(spyDefault).to.be.not.called;
+        expect(spyError1).to.be.calledOnce;
+        expect(spyError2).to.be.not.called;
+
+      });
+
+      it('should completely replace handlers', function () {
+        let error1 = this.sinon.spy();
+        instance.setErrorHandlers({ error1 }, true);
+        silentHandle('default');
+        silentHandle('error1');
+        silentHandle('error2');
+        expect(spyDefault).to.be.not.called;
+        expect(spyError1).to.be.not.called;
+        expect(spyError2).to.be.not.called;
+        expect(error1).to.be.calledOnce;
+      });
+
     });
     describe('handleError', function () {
       let OopsError;
@@ -522,16 +675,28 @@ describe('Router', function () {
         });
       });
     });
-    it('should throw if there is no ErrorHandler', () => {
-      routing.instance.setErrorHandlers(true, { default: undefined, exception: undefined });
+
+    it('should throw if there is no ErrorHandler and some error occur during request', async () => {
+      let error = new Error('Ooops');
+      routing.instance.setErrorHandlers(null);
+
       routing.get('test-exception', () => {
-        throw new Error('Ooops')
+        throw error
       });
+
       routing.start({ trigger: false });
-      sinon.spy(routing.instance, 'handleError');
-      routing.navigate('test-exception').catch(() => { });
-      expect(routing.instance.handleError).to.throw();
+
+      let catched;
+      try {
+        await routing.navigate('test-exception');
+      } catch (e) {
+        catched = e;
+      }
+
+      expect(catched).to.be.equal(error);
+
     });
+
   });
 
   describe('navigate', function () {
@@ -601,6 +766,7 @@ describe('Router', function () {
         await instance.navigate('http://localhost/#/test');
 
         await instance.navigate('/foo/bar/#/test');
+
         expect(mw1.callCount).to.be.equal(2);
         expect(mw2.callCount).to.be.equal(2);
       });
@@ -614,6 +780,7 @@ describe('Router', function () {
       let acc;
       let art;
       let argumentsSpy;
+
       const makeInc = (key, cb) => {
         return (...args) => {
           inc(key);
@@ -622,14 +789,17 @@ describe('Router', function () {
           }
         };
       };
+
       beforeEach(function () {
         argumentsSpy = sinon.spy();
         counters = {};
         inc = sinon.spy(key => {
           counters[key] = counters[key] ? ++counters[key] : 1;
         });
+
         routing.stop();
         routing.instance = new config.Router();
+
         routing.start({
           trigger: false,
           errorHandlers: {
@@ -638,38 +808,56 @@ describe('Router', function () {
             }
           }
         });
+
         gmw1 = sinon.spy((r, e, n) => n());
         gmw2 = sinon.spy((r, e, n) => n());
         gmw3 = sinon.spy((r, e, n) => n());
 
+        // /, /login, /register
         acc = new config.Router();
         acc.get('', makeInc('acc'));
         acc.get('login', makeInc('acc/login'));
         acc.get('register', makeInc('acc/register'));
         acc.use(gmw2);
 
+        // /, /:id
+        // /shmacc, shmacc/login, /shmacc/register
         art = new config.Router();
         art.get('', makeInc('art'));
         art.get(':id', makeInc('art/:id'));
         art.use(gmw3);
-
         art.use('shmacc', acc);
 
+        // /:subdivision(/:id)
         let subtest = new config.Router();
-        subtest.get(
-          ':subdivision(/:id)',
+        subtest.get(':subdivision(/:id)',
           makeInc(':division/:subdivion', req => argumentsSpy(req.args))
         );
+
+        //subtest.add('something', art);
+
+        //acc.add('wrong', subtest);
+
+        // /:division/:subdivision(/:id)
         let test = new config.Router();
         test.use(':division', subtest);
 
         routing.use(gmw1);
+
+        // /acc, /acc/login, /acc/register
         routing.use('acc', acc);
+
+        // /art, /art/:id
+        // /art/shmacc, /art/shmacc/login, /art/shmacc/register
         routing.use('art', art);
+
+        // /test/:division/:subdivision(/:id)
         routing.use('test', test);
+
       });
       it("should correctly process nested router's request", async function () {
         await routing.navigate('acc/login');
+
         expect(counters['acc/login']).to.be.equal(1);
         expect(gmw1, 'gmw1').to.be.calledOnce;
         expect(gmw2, 'gmw2').to.be.calledOnce;
@@ -684,6 +872,7 @@ describe('Router', function () {
         expect(gmw1.callCount, 'gmw1').to.be.equal(3);
         expect(gmw2.callCount, 'gmw2').to.be.equal(2);
         expect(gmw3.callCount, 'gmw3').to.be.equal(2);
+
       });
       it('should execute nested router routeHandler and args should be ok', async function () {
         await routing.navigate('test/pupkin/arts/aboutCats');
@@ -827,6 +1016,7 @@ describe('Router', function () {
       });
     });
   });
+
   describe('hash based navigate', function () {
     let counters;
     let inc;

@@ -32,13 +32,15 @@ class Router {
 
     this._globalMiddlewares = [];
     this._nestedInHandlers = [];
-    this.setErrorHandlers(this.errorHandlers, options.errorHandlers);
-    if (options.onRequestStart !== void 0) {
+    this.setErrorHandlers(options.errorHandlers);
+
+    if (typeof options.onRequestStart === 'function') {
       this.onRequestStart = options.onRequestStart;
     }
-    if (options.onRequestEnd !== void 0) {
+    if (typeof options.onRequestEnd === 'function') {
       this.onRequestEnd = options.onRequestEnd;
     }
+
   }
 
   /**
@@ -117,16 +119,25 @@ class Router {
     let router = middlewares instanceof config.Router ? middlewares : null;
 
     let routeHandler = this._ensureRouteHanlder(path, router);
-    if (!routeHandler.isRouter()) {
-      if (router) {
+    if (router) {
+      if (router === this) {
+        throw new Error(
+          'Circular router nesting detected'
+        );
+      } else if (!routeHandler.isRouter()) {
         throw new Error(
           'This routeHandler already initialized as regular and does not support adding a Router'
         );
+      } else {
+        if (router.hasNestedRouter(this)) {
+          throw new Error('Circular router nesting detected');
+        }
+        routeHandler.setRouter(router);
       }
+    } else {
       routeHandler.addMiddlewares(middlewares, unshift);
-    } else if (router) {
-      routeHandler.setRouter(router);
     }
+
     return routeHandler;
   }
 
@@ -218,10 +229,8 @@ class Router {
   _ensureRouteHanlder(path, router) {
     let routeHandler = this.routes.get(path);
     if (!routeHandler) {
-      routeHandler = new config.RouteHandler(
-        path,
-        router instanceof config.Router ? router : null
-      );
+      router = router instanceof config.Router ? router : null;
+      routeHandler = new config.RouteHandler(path, router);
       this.routes.add(routeHandler);
     }
     return routeHandler;
@@ -281,6 +290,8 @@ class Router {
    * @memberof Router
    */
   async _processRequest(url, options) {
+
+
     // creating requestContext and responseContext
     let req = this.createRequestContext(url, options);
     let res = this.createResponseContext(req);
@@ -291,28 +302,48 @@ class Router {
     let context = this.findRouteHandlerContext(req);
 
     if (!context) {
-      this.handleError('notfound', req, res);
+      res.setError('notfound');
+      this._finalyzeRequest(req, res);
       return;
     }
+
 
     let { handler, path, globalMiddlewares } = context;
     let processOptions = Object.assign({ path, globalMiddlewares }, options);
     let result;
+
     try {
       result = await handler.processRequest(req, res, processOptions);
     } catch (ex) {
-      //console.warn(ex);
       res.setError(ex);
     }
 
-    this.handleError(res.error, req, res);
-
-    // if (res.error) {
-    //   this.handleError(res.error, req, res);
-    // } else {
-    //   invoke(this.onRequestEnd, this, void 0, req, res, options);
+    this._finalyzeRequest(req, res);
+    // try {
+    // } catch (ex) {
+    //   console.log('oplya2!', ex);
+    //   throw ex;
     // }
+
+
     return result;
+  }
+
+  _finalyzeRequest(req, res) {
+    invoke(this.onRequestEnd, this, res.error, req, res);
+    this.handleError(res.error, req, res);
+  }
+
+  /**
+   * Checks if given router is nested somewhere in route contexts
+   * @param {*} router 
+   * @returns {boolean}
+   */
+  hasNestedRouter(router) {
+    if (this === router) {
+      return true;
+    }
+    return this.routes.items.some(item => item.hasNestedRouter(router));
   }
 
   /**
@@ -324,28 +355,28 @@ class Router {
    * @memberof Router
    */
   getRouteContexts(routeContext = {}) {
+
     let {
       globalMiddlewares = [],
       segments = [],
-      _circular = [] // for preventing curcular router nesting.
+      _circular = [] // for preventing curcular router nesting if somehow there will be one.
     } = routeContext;
 
-    if (_circular.indexOf(this) > 1) {
-      throw new Error('Circular router nesting detected');
-    } else {
-      _circular.push(this);
+    if (_circular.indexOf(this) > -1) {
+      throw new Error('Circular router nesting detected while building route context');
     }
 
     return this.routes.items.reduce((allcontexts, handler) => {
       let result = handler.getRouteContexts({
         globalMiddlewares: [...globalMiddlewares, ...this._globalMiddlewares],
         segments,
-        _circular,
+        _circular: [..._circular, this],
         router: this
       });
       allcontexts.push(...result);
       return allcontexts;
     }, []);
+
   }
 
   /**
@@ -396,20 +427,21 @@ class Router {
    * @memberof Router
    */
   handleError(error, req, res) {
-    //console.log('-now handling error-');
-    invoke(this.onRequestEnd, this, error, req, res);
+
     if (!error) return;
 
     let errorKey = this.getErrorHandlerName(error);
+
+
     let defaultHandler = this._errorHandlers.default;
     let handler = this._errorHandlers[errorKey];
+
     if (typeof handler === 'function') {
       handler.call(this, error, req, res);
     } else if (errorKey !== 'default' && typeof defaultHandler === 'function') {
       defaultHandler.call(this, error, req, res);
     } else {
-      //new Error(req.path + ': ' + errorKey);
-      //console.error('error type:', errorKey, 'path:', req.path);
+      //console.warn('error type:', errorKey, 'path:', req.path);
       throw error;
     }
   }
@@ -433,21 +465,57 @@ class Router {
   }
 
   /**
-   * Sets errorHandlers hash. By default merge exist errorHandlers with given
+   * Sets errorHandlers hash. By default replace exist errorHandlers with provided handlers
    * @example
    * //will removes all existing handlers and sets myNewDefaultErrorHandler as default
-   * routing.setErrorHandlers(true, { default: myNewDefaultErrorHandler });
-   * //will replace default handler with myNewDefaultErrorHandler
-   * routing.setErrorHandlers(false, { default: myNewDefaultErrorHandler });
-   * //will replace default handler with myNewDefaultErrorHandler, like in previous example
+   * routing.setErrorHandlers({ default: myNewDefaultErrorHandler }, true);
+   * 
+   * //will replace default handler with myNewDefaultErrorHandler and leaves other handler in place
    * routing.setErrorHandlers({ default: myNewDefaultErrorHandler });
+   * routing.setErrorHandlers({ default: myNewDefaultErrorHandler }, false);
    *
-   * @param {boolean} shouldReplace Indicates should errorHandlers be replaced or merged, can be omited and in that case default value will be used
-   * @param  {...Object.<string, function>} handlers Objects literals to merge or replace with
+   * @param  {Object.<string, function>|null} handlers Objects literals to merge or replace with
+   * @param {boolean} [shouldReplace] Indicates should errorHandlers be replaced or merged, default behavior is merge
    * @private
    */
-  setErrorHandlers(shouldReplace, ...handlers) {
-    if (typeof shouldReplace == 'object') {
+  setErrorHandlers(handlers, shouldReplace) {
+    if (!arguments.length) { return; }
+    // supporting old signature for a while
+    // will be deprecated after some releases
+    if (handlers && typeof handlers === 'object' && shouldReplace && typeof shouldReplace === 'object') {
+      handlers = [handlers, shouldReplace];
+      shouldReplace = false;
+    }
+    else if (shouldReplace && typeof shouldReplace === 'object') {
+      let _flag = handlers;
+      handlers = shouldReplace;
+      shouldReplace = _flag !== false;
+    }
+
+    // supporting old signature for a while
+    // will be deprecated after some releases
+    if (handlers && Array.isArray(handlers)) {
+      handlers = handlers.reduce((memo, hash) => Object.assign(memo, hash), {});
+    }
+
+    if (handlers === null) {
+      handlers = {};
+      shouldReplace = true;
+    } else if (typeof handlers !== 'object') {
+      return;
+    }
+
+    let updatedHandlers;
+    if (shouldReplace) {
+      updatedHandlers = { ...handlers };
+    } else {
+      updatedHandlers = Object.assign({}, this._errorHandlers, handlers);
+    }
+
+    this._errorHandlers = updatedHandlers;
+
+    /*
+    if (typeof shouldReplace === 'object') {
       let _handlers = handlers;
       handlers = Array.isArray(shouldReplace) ? shouldReplace : [shouldReplace];
       handlers.push(..._handlers);
@@ -457,6 +525,7 @@ class Router {
       handlers.unshift(this._errorHandlers);
     }
     this._errorHandlers = Object.assign({}, ...handlers);
+    */
   }
 
   //#endregion
@@ -472,6 +541,7 @@ class Router {
    * @memberof Router
    */
   navigate(url, options = {}) {
+    //disable calling navigate on nested routers
     this._ensureNotNested();
     this._ensureStarted();
     if (typeof url === 'object') {
@@ -564,8 +634,8 @@ class Router {
    * @returns {Router}
    * @memberof Router
    */
-  _ensureStarted(value = false) {
-    let message = value ? 'already' : 'not yet';
+  _ensureStarted(value = false, message = 'not yet') {
+    //let message = value ? 'already' : 'not yet';
     if (this.isRoutingStarted() === value) {
       throw new Error(`Router ${message} started`);
     }
@@ -604,10 +674,10 @@ class Router {
     return this.createRequestContext(arg);
   }
   /**
-   * unregisters junction between routeHandler and router
-   * @private
-   * @param {RouteHandler} routeHandler
-   */
+     * unregisters junction between routeHandler and router
+     * @private
+     * @param {RouteHandler} routeHandler
+     */
   _releaseHandler(routeHandler) {
     let index = this._nestedInHandlers.indexOf(routeHandler);
     if (index > -1) {

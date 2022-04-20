@@ -1,5 +1,6 @@
-import routing from "../../routing";
+//import routing from "../../routing";
 
+const routing = global.routing;
 const config = global.config;
 const DefaultRouter = config.Router;
 const handler1 = (req, res, next) => next && next();

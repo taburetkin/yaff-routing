@@ -165,6 +165,7 @@ Manipulates existing routeHandlers, global middlewares and processes the request
     * [.hasMiddleware(middleware)](#Router+hasMiddleware) ⇒ <code>boolean</code>
     * [.createRequestContext(url, options)](#Router+createRequestContext) ⇒
     * [.createResponseContext(req)](#Router+createResponseContext) ⇒
+    * [.hasNestedRouter(router)](#Router+hasNestedRouter) ⇒ <code>boolean</code>
     * [.handleError(error, req, res)](#Router+handleError)
     * [.getErrorHandlerName(error)](#Router+getErrorHandlerName) ⇒ <code>string</code>
     * [.navigate(url, [options])](#Router+navigate) ⇒ <code>Promise</code>
@@ -295,6 +296,17 @@ Creates ResponseContext instance
 | --- | --- |
 | req | [<code>RequestContext</code>](#RequestContext) | 
 
+<a name="Router+hasNestedRouter"></a>
+
+### router.hasNestedRouter(router) ⇒ <code>boolean</code>
+Checks if given router is nested somewhere in route contexts
+
+**Kind**: instance method of [<code>Router</code>](#Router)  
+
+| Param | Type |
+| --- | --- |
+| router | <code>\*</code> | 
+
 <a name="Router+handleError"></a>
 
 ### router.handleError(error, req, res)
@@ -394,6 +406,7 @@ Represents handler for a given string route.When request occurs and request pat
     * [.addMiddlewares(middlewares)](#RouteHandler+addMiddlewares)
     * [.addMiddleware(middleware)](#RouteHandler+addMiddleware)
     * [.removeMiddleware(middleware)](#RouteHandler+removeMiddleware) ⇒ <code>function</code> \| <code>void</code>
+    * [.hasNestedRouter(router)](#RouteHandler+hasNestedRouter) ⇒ <code>boolean</code>
     * [.removeMiddlewares(middlewares)](#RouteHandler+removeMiddlewares) ⇒ <code>void</code>
     * [.hasMiddleware(middleware)](#RouteHandler+hasMiddleware) ⇒ <code>boolean</code>
     * [.extractRouteArguments(req)](#RouteHandler+extractRouteArguments) ⇒ <code>Object.&lt;string, \*&gt;</code>
@@ -448,6 +461,17 @@ Removes given middleware from middlewares array
 | Param | Type |
 | --- | --- |
 | middleware | <code>function</code> | 
+
+<a name="RouteHandler+hasNestedRouter"></a>
+
+### routeHandler.hasNestedRouter(router) ⇒ <code>boolean</code>
+Checks if given router is nested somewhere in route contexts
+
+**Kind**: instance method of [<code>RouteHandler</code>](#RouteHandler)  
+
+| Param | Type |
+| --- | --- |
+| router | <code>\*</code> | 
 
 <a name="RouteHandler+removeMiddlewares"></a>
 

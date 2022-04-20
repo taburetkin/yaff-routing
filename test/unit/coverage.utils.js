@@ -2,72 +2,12 @@
 //Object.assign(config, routing.config);
 
 import { expect } from 'chai';
-import { invoke, url, buildSegments, compare } from '../../utils';
-import config from '../../config';
-
+import { invoke, buildSegments, compare } from '../../utils';
+//import config from '../../config';
+const url = global.normalizeUrl;
+const urlParams = global.replaceUrlParams;
+const config = global.config;
 //const config = global.config;
-
-
-/*
-
-describe.only('url', function () {
-
-  const paths = {
-    '': '',
-    '/foo/bar': '/foo/bar',
-    'foo/bar': '/foo/bar',
-    '#foo/bar': '/#foo/bar',
-    '/#foo/bar': '/#foo/bar',
-    '#/foo/bar': '/#/foo/bar'
-  };
-
-  afterEach(function () {
-    config.useHashes = false;
-    //routing.config.useHashes = false;
-    //config.useHashes = false;
-  });
-
-  it('when useHashes is true should pass all doubled path without prefix', function () {
-    let prefix = '';
-    console.log('useHashes is: ', config.useHashes);
-    Object.keys(paths).forEach(passedUrl => {
-      let outputUrl = paths[passedUrl] + paths[passedUrl];
-      if (outputUrl === '') {
-        outputUrl = '/';
-      }
-      let result = url(passedUrl, passedUrl);
-      console.log('out: ', prefix + outputUrl, (prefix + outputUrl).length);
-      console.log('res:', result, result.length);
-      expect(result).to.be.equal(prefix + outputUrl);
-    });
-  });
-
-  it('when useHashes is true should pass all doubled path with `/#` prefix', function () {
-
-    let prefix = '/#';
-    config.useHashes = true;
-
-    console.log('useHashes is: ', config.useHashes);
-
-    Object.keys(paths).forEach(passedUrl => {
-      let outputUrl = paths[passedUrl] + paths[passedUrl];
-      if (outputUrl === '') {
-        outputUrl = '/';
-      }
-      let result = url(passedUrl, passedUrl);
-      console.log('out: ', prefix + outputUrl, (prefix + outputUrl).length);
-      console.log('res:', result, result.length);
-      expect(result).to.be.equal(prefix + outputUrl);
-    });
-  });
-
-  it('should treat null or empty string as root page path', function () {
-    expect(url('')).to.be.equal(url());
-  });
-
-});
-
-*/
 
 describe("utils coverage", () => {
 
@@ -130,6 +70,50 @@ describe("utils coverage", () => {
 
 
 
+  });
+
+  describe("replaceUrlParams", () => {
+    it('should not throw if called without arguments', () => {
+      expect(urlParams).to.not.throw();
+    });
+    it('should return exactly given argument if its falsy', () => {
+      let res1 = urlParams(false, {});
+      let res2 = urlParams(null, {});
+      let res3 = urlParams(0, {});
+      let res4 = urlParams('', {});
+      expect(res1).to.be.false;
+      expect(res2).to.be.null;
+      expect(res3).to.be.equal(0);
+      expect(res4).to.be.equal('');
+    });
+    it('should return exactly given argument if no args was provided', () => {
+      let res1 = urlParams(false);
+      let res2 = urlParams(null);
+      let res3 = urlParams(0);
+      let res4 = urlParams('');
+      let res5 = urlParams('foo/bar');
+      expect(res1).to.be.false;
+      expect(res2).to.be.null;
+      expect(res3).to.be.equal(0);
+      expect(res4).to.be.equal('');
+      expect(res5).to.be.equal('foo/bar');
+    });
+    it('should remove trailing optional slash (/)', () => {
+      let res = urlParams('asd/qwe(/)', { id: 1 });
+      expect(res).to.be.equal('asd/qwe');
+    });
+    it('should remove optional segment if its missing in args', () => {
+      let res = urlParams('asd/qwe(/:optional)/finaly', { id: 1 });
+      expect(res).to.be.equal('asd/qwe/finaly');
+    });
+    it('should leave untouched segment missing in args', () => {
+      let res = urlParams('asd/qwe/:zxc', { id: 1 });
+      expect(res).to.be.equal('asd/qwe/:zxc');
+    });
+    it('should replace params', () => {
+      let res = urlParams('asd(/:qwe)/:zxc', { zxc: 'bar', qwe: 'foo' });
+      expect(res).to.be.equal('asd/foo/bar');
+    })
   });
 
   describe('buildSegments', function () {

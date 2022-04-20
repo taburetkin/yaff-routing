@@ -50,18 +50,20 @@ export function buildPath(url, useHashes) {
 }
 
 /**
- * Helper to create application urls
+ * Helper to create application urls, with parameters replacement
  * @example
- * `<a href="${url('foo/bar')}"></a>`
- * if config.useHashes is `true` then will produce "/#/foo/bar" url
- * if not then will produce "/foo/bar" url
+ * `<a href="${url('foo/bar/:id', { id: 123 })}"></a>`
+ * if config.useHashes is `true` then will produce "/#/foo/bar/123" url
+ * if not then will produce "/foo/bar/123" url
  * @export
  * @param {string[]} chunks
  * @returns {string}
  */
-export function url(urlText = '') {
+export function normalizeUrl(urlText = '', args) {
 
   let useHashes = config.useHashes;
+
+  urlText = replaceUrlParams(urlText, args);
 
   if (urlText.length) {
     // converts `#asd/qwe` to `asd/qwe`
@@ -82,6 +84,40 @@ export function url(urlText = '') {
   let res = useHashes ? '/#' + urlText : urlText;
   return res;
 
+}
+
+
+function _matcher(args, ifNoMatch, match, group) {
+  if (group in args) {
+    let val = args[group];
+    if (match.indexOf('/') > -1) {
+      val = '/' + val;
+    }
+    return val;
+  } else {
+    return ifNoMatch != null ? ifNoMatch : match;
+  }
+};
+
+/**
+ * Will replace parameters with values from given object: '/qwe/zxc/:id', { id: 123 } -> /qwe/zxc/123 
+ * @param {string} url - url
+ * @param {object} args - object with url parameters value
+ * @returns replaced string
+ */
+export function replaceUrlParams(url, args) {
+  if (!url || !(args && typeof args === 'object')) { return url; }
+
+  url = url.replace(/\(\/\)/g, '');
+  let pat1 = /\(\/*:(\w[\w\d_-]*)\)/g;
+  let pat2 = /:(\w[\w\d_-]*)/g;
+  let matcher = _matcher.bind(null, args, '');
+
+  url = url.replace(pat1, matcher);
+
+  matcher = _matcher.bind(null, args, null);
+  url = url.replace(pat2, matcher);
+  return url.replace(/(?<!:)\/+/g, '/');
 }
 
 
@@ -146,10 +182,10 @@ export function invoke(method, context, ...args) {
     return method;
   }
 
-  if (args.length === 0 || args.length > 1) {
-    return method.apply(context, args);
-  } else {
+  if (args.length === 1) {
     return method.call(context, args[0]);
+  } else {
+    return method.apply(context, args);
   }
 
 }

@@ -6,6 +6,7 @@ import ResponseContext from './ResponseContext';
 import RoutesManager from './RoutesManager';
 
 import routing from './routing';
+import { normalizeUrl, replaceUrlParams } from './utils';
 
 config.Router = Router;
 config.RouteHandler = RouteHandler;
@@ -20,5 +21,7 @@ export {
   RouteHandler,
   RequestContext,
   ResponseContext,
-  RoutesManager
+  RoutesManager,
+  normalizeUrl,
+  replaceUrlParams
 };
